@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, MainLayout } from "@/layouts";
-import { Login, NotFound, Register, Workouts } from "@/pages";
+import { Create, Login, NotFound, Register, Workouts } from "@/pages";
 import { ProtectedRoute, PublicRoute } from "./components";
 
 export const router = createBrowserRouter([
@@ -14,34 +14,48 @@ export const router = createBrowserRouter([
       },
       {
         path: 'workouts',
+        children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute>
+                <Workouts />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: 'create',
+            element: (
+              <ProtectedRoute>
+                <Create />
+              </ProtectedRoute>
+            )
+          }
+        ]
+      },
+      {
+        path: 'auth',
         element: (
-          <ProtectedRoute>
-            <Workouts />
-          </ProtectedRoute>
-        )
+          <PublicRoute>
+            <AuthLayout />
+          </PublicRoute>
+        ),
+        children: [
+          {
+            path: 'login',
+            element: <Login />
+          },
+          {
+            path: 'register',
+            element: <Register />,
+          },
+        ],
       },
-    ],
-  },
-  {
-    path: '/auth',
-    element: (
-      <PublicRoute>
-        <AuthLayout />
-      </PublicRoute>
-    ),
-    children: [
+      // Обработка несуществующих путей внутри MainLayout
       {
-        path: 'login',
-        element: <Login />
-      },
-      {
-        path: 'register',
-        element: <Register />,
-      },
-    ],
-  },
-  {
-    path: '*',
-    element: <NotFound />,
-  },
+        path: '*',
+        element: <NotFound />
+      }
+    ]
+  }
 ]);
