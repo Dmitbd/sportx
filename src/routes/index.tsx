@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, MainLayout } from "@/layouts";
-import { Create, Login, NotFound, Register, Workouts } from "@/pages";
+import { Confirm, Guided, Login, NotFound, Register, Workouts } from "@/pages";
 import { ProtectedRoute, PublicRoute } from "./components";
 
 export const router = createBrowserRouter([
@@ -25,11 +25,28 @@ export const router = createBrowserRouter([
           },
           {
             path: 'create',
-            element: (
-              <ProtectedRoute>
-                <Create />
-              </ProtectedRoute>
-            )
+            children: [
+              {
+                index: true,
+                element: <Navigate to="guided" replace />
+              },
+              {
+                path: 'guided',
+                element: (
+                  <ProtectedRoute>
+                    <Guided />
+                  </ProtectedRoute>
+                )
+              },
+              {
+                path: 'confirm',
+                element: (
+                  <ProtectedRoute>
+                    <Confirm />
+                  </ProtectedRoute>
+                )
+              }
+            ]
           }
         ]
       },
@@ -51,7 +68,6 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      // Обработка несуществующих путей внутри MainLayout
       {
         path: '*',
         element: <NotFound />

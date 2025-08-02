@@ -1,4 +1,4 @@
-import { Input, Stack } from "@chakra-ui/react";
+import { Button, Input, Stack } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 export const Register = () => {
@@ -7,7 +7,9 @@ export const Register = () => {
       <Input placeholder="login" variant="outline" />
       <Input placeholder="password" variant="outline" />
       <Input placeholder="password" variant="outline" />
-      <Link to={'/auth/login'}>login</Link>
+      <Button asChild>
+        <Link to={'/auth/login'}>login</Link>
+      </Button>
     </Stack>
   )
 };

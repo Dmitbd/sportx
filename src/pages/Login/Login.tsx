@@ -27,7 +27,10 @@ export const Login = () => {
       <Input name="email" placeholder="login" variant="outline" value={formData.email} onChange={handleFormChange} />
       <Input name="password" placeholder="password" variant="outline" value={formData.password} onChange={handleFormChange} />
       <Button onClick={onSubmitForm}>login</Button>
-      <Link to={'/auth/register'}>register</Link>
+      <Button asChild>
+        <Link to={'/auth/register'}>register</Link>
+      </Button>
+
     </Stack>
   )
 };
