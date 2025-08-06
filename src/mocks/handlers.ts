@@ -1,4 +1,6 @@
 import { HttpResponse, delay, http } from 'msw';
+import aiResponse from './aiResponse.json';
+
 
 type LoginRequest = { email: string; password: string };
 type RegisterRequest = { email: string; password: string };
@@ -55,5 +57,19 @@ export const handlers = [
   http.post('/api/auth/logout', async () => {
     await delay(100);
     return HttpResponse.json({ success: true }, { status: 200 });
+  }),
+
+  // Запрос к LLM
+  http.post('/api/v1/chat/completions', async () => {
+    await delay(1000);
+    return HttpResponse.json({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify(aiResponse)
+          }
+        }
+      ]
+    }, { status: 200 });
   })
 ];

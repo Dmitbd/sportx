@@ -1,9 +1,10 @@
 import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 import { EquipmentCard } from "../components";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { EquipmentItem } from "../types";
 import { initialItems } from "../constants";
+import { useWorkoutStore } from "@/stores/workoutStore";
 
 export const Guided = () => {
   const [workoutCount, setWorkoutCount] = useState<string | null>(null);
@@ -11,18 +12,33 @@ export const Guided = () => {
   const [hasHomeEquipment, setHasHomeEquipment] = useState<string | null>(null);
   const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialItems);
 
+  const navigate = useNavigate();
+  const setWorkoutData = useWorkoutStore((state) => state.setWorkoutData);
+  const generateWorkoutPlan = useWorkoutStore((state) => state.generateWorkoutPlan);
+  const workoutPlan = useWorkoutStore((state) => state.workoutPlan);
+
   const handleItemUpdate = (updatedItem: EquipmentItem) => {
     setEquipmentList(prev =>
       prev.map(item => item.name === updatedItem.name ? updatedItem : item)
     );
   };
 
-  const handleSubmit = () => {
-    console.log('submit', {
-      'workoutCount': workoutCount,
-      'place': place,
-      'equipment': equipmentList
+  const handleSubmit = async () => {
+    // TODO делаем запрос, при успехе идем на страницу редактирования тренировок, при ошибке обработка ошибки
+
+    await generateWorkoutPlan({
+      workoutCount,
+      place,
+      equipment: equipmentList
     });
+
+    setWorkoutData({
+      workoutCount,
+      place,
+      equipment: equipmentList
+    });
+
+    navigate('/workouts/create/confirm');
   };
 
   return (
@@ -168,22 +184,18 @@ export const Guided = () => {
                   </Stack>
                 )
               }
-
-              <Button
-                type="submit"
-                colorScheme="blue"
-                mt={4}
-                asChild
-                onClick={handleSubmit}
-              >
-                <Link to={'/workouts/create/confirm'}>
-                  Продолжить
-                </Link>
-              </Button>
             </Stack>
+            <Button
+              colorScheme="blue"
+              mt={4}
+              onClick={handleSubmit}
+            >
+              Продолжить
+            </Button>
           </form>
         </CardBody>
       </Card.Root>
+
     </Box>
   );
 };
