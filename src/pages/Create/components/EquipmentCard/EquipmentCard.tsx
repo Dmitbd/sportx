@@ -1,35 +1,87 @@
 import { Accordion, Span, NumberInput, HStack, IconButton, Field } from "@chakra-ui/react";
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { LuMinus, LuPlus } from "react-icons/lu";
+import type { EquipmentItem } from "../../types";
 
 export const EquipmentCard = ({
-  item
+  item,
+  onUpdate
 }: {
-  item: string
+  item: EquipmentItem;
+  onUpdate: (updatedItem: EquipmentItem) => void;
 }) => {
-  const [count, setCount] = useState<number>(0);
+  const increment = useCallback(() => {
+    const newItem: EquipmentItem = {
+      ...item,
+      units: [...item.units, [item.units.length + 1, 0]]
+    };
 
-  const increment = useCallback(() => setCount(prev => Math.min(prev + 1, 10)), []);
+    onUpdate(newItem);
+  }, [item, onUpdate]);
 
-  const decrement = useCallback(() => setCount(prev => Math.max(prev - 1, 0)), []);
+  const decrement = useCallback(() => {
+    if (item.units.length === 0) {
+      return;
+    }
+
+    const newItem: EquipmentItem = {
+      ...item,
+      units: [...item.units.slice(0, -1)]
+    };
+
+    onUpdate(newItem);
+  }, [item, onUpdate]);
+
+  const handleWeightChange = useCallback((index: number, weight: number) => {
+    const newUnits: EquipmentItem['units'] = item.units.map((unit, i) =>
+      i === index
+        ? [unit[0], weight]
+        : unit
+    );
+
+    onUpdate({ ...item, units: newUnits });
+  }, [item, onUpdate]);
 
   return (
-    <Accordion.Item value={item}>
+    <Accordion.Item value={item.name}>
       <Accordion.ItemTrigger>
-        <Span flex="1">{item}</Span>
+        <Span flex="1">
+          {item.name}
+        </Span>
         <Accordion.ItemIndicator />
       </Accordion.ItemTrigger>
       <Accordion.ItemContent>
-        <NumberInput.Root defaultValue="0" unstyled spinOnPress={false} value={String(count)}>
+        <NumberInput.Root
+          defaultValue="0"
+          unstyled
+          spinOnPress={false}
+          value={String(item.units.length)}
+        >
           <HStack gap="2">
-            <NumberInput.DecrementTrigger asChild onClick={decrement}>
-              <IconButton variant="outline" size="sm">
+            <NumberInput.DecrementTrigger
+              asChild
+              onClick={decrement}
+            >
+              <IconButton
+                variant="outline"
+                size="sm"
+              >
                 <LuMinus />
               </IconButton>
             </NumberInput.DecrementTrigger>
-            <NumberInput.ValueText textAlign="center" fontSize="lg" minW="3ch" />
-            <NumberInput.IncrementTrigger asChild onClick={increment}>
-              <IconButton variant="outline" size="sm">
+            <NumberInput.ValueText
+              textAlign="center"
+              fontSize="lg"
+              minW="3ch"
+            />
+            <NumberInput.IncrementTrigger
+              asChild
+              onClick={increment}
+            >
+              <IconButton
+                variant="outline"
+                size="sm"
+              >
                 <LuPlus />
               </IconButton>
             </NumberInput.IncrementTrigger>
@@ -38,15 +90,26 @@ export const EquipmentCard = ({
         <Accordion.ItemBody>
           {/* TODO добавить валидацию веса */}
           {
-            Array(count).fill(0).map((_item, index) => (
-              <Field.Root key={index} invalid={false}>
+            item.units.map(([number, weight], index) => (
+              <Field.Root key={number} invalid={false}>
                 <Field.Label>Укажите вес в кг.</Field.Label>
-                <NumberInput.Root defaultValue="0" width="200px" min={0} max={50}>
+                <NumberInput.Root
+                  defaultValue="0"
+                  width="200px"
+                  min={0}
+                  max={50}
+                  value={String(weight)}
+                  onValueChange={({ value }) => handleWeightChange(index, Number(value))}
+                >
                   <NumberInput.Control />
                   <NumberInput.Input />
                 </NumberInput.Root>
-                <Field.HelperText>Для грамм указывайте (0.1)</Field.HelperText>
-                <Field.ErrorText>The entry is invalid</Field.ErrorText>
+                <Field.HelperText>
+                  Для грамм указывайте (0.1)
+                </Field.HelperText>
+                <Field.ErrorText>
+                  The entry is invalid
+                </Field.ErrorText>
               </Field.Root>
             ))
           }

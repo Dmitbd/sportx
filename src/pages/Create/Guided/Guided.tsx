@@ -2,37 +2,68 @@ import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, St
 import { useState } from "react";
 import { EquipmentCard } from "../components";
 import { Link } from "react-router-dom";
+import type { EquipmentItem } from "../types";
+import { initialItems } from "../constants";
 
 export const Guided = () => {
   const [workoutCount, setWorkoutCount] = useState<string | null>(null);
   const [place, setPlace] = useState<string | null>(null);
   const [hasHomeEquipment, setHasHomeEquipment] = useState<string | null>(null);
+  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialItems);
+
+  const handleItemUpdate = (updatedItem: EquipmentItem) => {
+    setEquipmentList(prev =>
+      prev.map(item => item.name === updatedItem.name ? updatedItem : item)
+    );
+  };
 
   const handleSubmit = () => {
-    console.log('submit');
+    console.log('submit', {
+      'workoutCount': workoutCount,
+      'place': place,
+      'equipment': equipmentList
+    });
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={10}>
+    <Box
+      maxW="md"
+      mx="auto"
+      mt={10}
+    >
       <Card.Root>
         <CardBody>
-          <Heading as="h2" size="md" mb={6}>
+          <Heading
+            as="h2"
+            size="md"
+            mb={6}
+          >
             Создание программы тренировок
           </Heading>
 
           <form>
             <Stack gap={6}>
               <Stack>
-                <Heading as="h3" size="sm">
+                <Heading
+                  as="h3"
+                  size="sm"
+                >
                   Сколько тренировок в неделю?
                 </Heading>
-                <RadioGroup.Root onValueChange={(e) => setWorkoutCount(e.value)}>
+                <RadioGroup.Root
+                  onValueChange={(e) => setWorkoutCount(e.value)}
+                >
                   <HStack align="stretch">
                     {[1, 2, 3, 4, 5, 6, 7].map((item) => (
-                      <RadioGroup.Item key={item} value={String(item)} >
+                      <RadioGroup.Item
+                        key={item}
+                        value={String(item)}
+                      >
                         <RadioGroup.ItemHiddenInput />
                         <RadioGroup.ItemIndicator />
-                        <RadioGroup.ItemText>{item}</RadioGroup.ItemText>
+                        <RadioGroup.ItemText>
+                          {item}
+                        </RadioGroup.ItemText>
                       </RadioGroup.Item>
                     ))}
                   </HStack>
@@ -41,13 +72,21 @@ export const Guided = () => {
               {
                 workoutCount && (
                   <Stack>
-                    <Heading as="h3" size="sm">
+                    <Heading
+                      as="h3"
+                      size="sm"
+                    >
                       Где вы планируете тренироваться?
                     </Heading>
-                    <RadioGroup.Root onValueChange={(e) => setPlace(e.value)}>
+                    <RadioGroup.Root
+                      onValueChange={(e) => setPlace(e.value)}
+                    >
                       <HStack align="stretch">
                         {['Дома', 'В зале', 'На улице'].map((item) => (
-                          <RadioGroup.Item key={item} value={item}>
+                          <RadioGroup.Item
+                            key={item}
+                            value={item}
+                          >
                             <RadioGroup.ItemHiddenInput />
                             <RadioGroup.ItemIndicator />
                             <RadioGroup.ItemText>{item}</RadioGroup.ItemText>
@@ -62,7 +101,10 @@ export const Guided = () => {
               {
                 workoutCount && place === 'Дома' && (
                   <Stack>
-                    <Heading as="h3" size="sm">
+                    <Heading
+                      as="h3"
+                      size="sm"
+                    >
                       Есть ли у вас домашний инвентарь?
                     </Heading>
                     <RadioGroup.Root onValueChange={(e) => setHasHomeEquipment(e.value)}>
@@ -82,9 +124,16 @@ export const Guided = () => {
 
                     {
                       hasHomeEquipment && (
-                        <Accordion.Root variant='enclosed' collapsible>
-                          {['Гриф для штанги', 'Гриф для гантели', 'Гантели', 'Блины', 'Резинки'].map((item, index) => (
-                            <EquipmentCard key={index} item={item} />
+                        <Accordion.Root
+                          variant='enclosed'
+                          collapsible
+                        >
+                          {equipmentList.map(item => (
+                            <EquipmentCard
+                              key={item.name}
+                              item={item}
+                              onUpdate={handleItemUpdate}
+                            />
                           ))}
                         </Accordion.Root>
                       )
@@ -96,7 +145,10 @@ export const Guided = () => {
               {
                 workoutCount && place === 'В зале' && (
                   <Stack>
-                    <Heading as="h3" size="sm">
+                    <Heading
+                      as="h3"
+                      size="sm"
+                    >
                       {/* TODO определиться с логикой зала */}
                       Что-то про улицу
                     </Heading>
@@ -107,15 +159,26 @@ export const Guided = () => {
               {
                 workoutCount && place === 'На улице' && (
                   <Stack>
-                    <Heading as="h3" size="sm">
+                    <Heading
+                      as="h3"
+                      size="sm"
+                    >
                       Какой есть инвентарь на улице?
                     </Heading>
                   </Stack>
                 )
               }
 
-              <Button type="submit" colorScheme="blue" mt={4} asChild onClick={handleSubmit}>
-                <Link to={'/workouts/create/confirm'}>Продолжить</Link>
+              <Button
+                type="submit"
+                colorScheme="blue"
+                mt={4}
+                asChild
+                onClick={handleSubmit}
+              >
+                <Link to={'/workouts/create/confirm'}>
+                  Продолжить
+                </Link>
               </Button>
             </Stack>
           </form>
