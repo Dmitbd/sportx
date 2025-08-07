@@ -15,7 +15,7 @@ export const Guided = () => {
   const navigate = useNavigate();
   const setWorkoutData = useWorkoutStore((state) => state.setWorkoutData);
   const generateWorkoutPlan = useWorkoutStore((state) => state.generateWorkoutPlan);
-  const workoutPlan = useWorkoutStore((state) => state.workoutPlan);
+  const isLoading = useWorkoutStore((state) => state.isLoading);
 
   const handleItemUpdate = (updatedItem: EquipmentItem) => {
     setEquipmentList(prev =>
@@ -46,6 +46,7 @@ export const Guided = () => {
       maxW="md"
       mx="auto"
       mt={10}
+      position="relative"
     >
       <Card.Root>
         <CardBody>
@@ -56,7 +57,6 @@ export const Guided = () => {
           >
             Создание программы тренировок
           </Heading>
-
           <form>
             <Stack gap={6}>
               <Stack>
@@ -195,7 +195,14 @@ export const Guided = () => {
           </form>
         </CardBody>
       </Card.Root>
-
+      {
+        isLoading && (
+          // TODO: еще нужно подумать над реализацией 
+          // (делать disabled для элементов на экране 
+          // или компонент обертку с overlay) <- это звучит проще
+          <Box pos="absolute" inset="0" bg="bg/80" h="full" w="full" />
+        )
+      }
     </Box>
   );
 };

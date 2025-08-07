@@ -11,6 +11,7 @@ import axios from 'axios';
  * - вынести prompt (подумать о prompt)
  * - все упростить
  * - подумать над обработкой ошибок в запросе
+ * - добавить в промт muscles: string[]
  */
 
 interface WorkoutState {

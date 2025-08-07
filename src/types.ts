@@ -16,6 +16,7 @@ export type Exercise = {
   description: string;
   sets: number;
   reps: number;
+  muscles: string[];
 }
 
 export type Training = {
