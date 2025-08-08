@@ -9,16 +9,17 @@ import {
   Spacer,
   Icon,
   Text,
-  Alert
+  Alert,
 } from '@chakra-ui/react';
 import { HiViewGridAdd } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
-import { getWorkouts, type Workout } from '@/services/workoutService';
+import { workoutService } from '@/services/api/workoutService';
 import { LoadingOverlay } from '@/components';
+import type { Workout } from '@/types';
 
 export const Workouts = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,16 +27,11 @@ export const Workouts = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getWorkouts();
-        // Преобразуем строки дат в объекты Date
-        const workoutsWithDates = data.map(workout => ({
-          ...workout,
-          createdAt: new Date(workout.createdAt)
-        }));
-        setWorkouts(workoutsWithDates);
+        const data = await workoutService.getWorkouts();
+        setWorkouts(data);
       } catch (err) {
-        console.error('Ошибка загрузки тренировок:', err);
-        setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
+        const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -80,6 +76,7 @@ export const Workouts = () => {
         </Alert.Root>
         <Button
           colorScheme="blue"
+          // TODO: передавать метод загрузки, а не reload
           onClick={() => window.location.reload()}
         >
           Попробовать снова

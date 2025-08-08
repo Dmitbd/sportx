@@ -1,8 +1,9 @@
 import { Box, Button, Card, CardBody, Heading, Stack, Text, Alert, Badge, Wrap } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { LoadingOverlay } from '@/components/LoadingOverlay/LoadingOverlay';
+import { workoutService } from '@/services';
 
 // TODO добавить редактирование упражнений/тренировки
 // TODO добавить индикатор о генерации плана для пользователя
@@ -13,26 +14,28 @@ import { LoadingOverlay } from '@/components/LoadingOverlay/LoadingOverlay';
  */
 export const Confirm = () => {
   const navigate = useNavigate();
-  
+
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
-    workoutPlan,
-    error,
-    saveWorkoutPlan,
+    workoutPlan
   } = useWorkoutStore();
 
   const handleSave = useCallback(async () => {
-    setIsLoading(true);
-    await saveWorkoutPlan();
-    navigate('/workouts');
-  }, [saveWorkoutPlan, navigate]);
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  useEffect(() => {
-    return () => {
+      await workoutService.saveWorkout(workoutPlan!);
+      navigate('/workouts');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+      setError(errorMessage);
+    } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [workoutPlan, navigate]);
 
   if (error) {
     return (

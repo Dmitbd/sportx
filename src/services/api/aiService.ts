@@ -7,14 +7,14 @@ import axios from 'axios';
 export const askAI = async (messages: AIMessage[]): Promise<AIWorkoutResponse> => {
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY_SECOND;
 
+  if (!apiKey) {
+    throw new Error('OpenRouter API key is missing');
+  }
+
   // проксируем на наши моки
   const baseURL = import.meta.env.MODE === 'proxy'
     ? '/api/v1/chat/completions'
     : 'https://openrouter.ai/api/v1/chat/completions';
-
-  if (!apiKey) {
-    throw new Error('OpenRouter API key is missing');
-  }
 
   try {
     const response = await axios.post(
@@ -29,7 +29,7 @@ export const askAI = async (messages: AIMessage[]): Promise<AIWorkoutResponse> =
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
-        timeout: 30000, // Увеличиваем таймаут до 30 секунд
+        timeout: 30000,
       }
     );
 

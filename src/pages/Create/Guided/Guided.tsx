@@ -1,11 +1,13 @@
 import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
 import type { EquipmentItem } from "../types";
 import { initialItems } from "../constants";
 import { useWorkoutStore } from "@/stores/workoutStore";
 import { LoadingOverlay } from "@/components";
+import { promptService } from "@/services";
+import { askAI } from "@/services";
 
 /**
  * @description Страница c формой сбора данных для создания плана тренировок
@@ -19,8 +21,7 @@ export const Guided = () => {
   const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialItems);
 
   const navigate = useNavigate();
-  const setWorkoutData = useWorkoutStore((state) => state.setWorkoutData);
-  const generateWorkoutPlan = useWorkoutStore((state) => state.generateWorkoutPlan);
+  const { setWorkoutData, setWorkoutPlan, setError } = useWorkoutStore();
 
   const handleItemUpdate = (updatedItem: EquipmentItem) => {
     setEquipmentList(prev =>
@@ -29,28 +30,34 @@ export const Guided = () => {
   };
 
   const handleSubmit = useCallback(async () => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    await generateWorkoutPlan({
-      workoutCount,
-      place,
-      equipment: equipmentList
-    });
+      setWorkoutData({
+        workoutCount,
+        place,
+        equipment: equipmentList
+      });
 
-    setWorkoutData({
-      workoutCount,
-      place,
-      equipment: equipmentList
-    });
+      const prompt = promptService.generateWorkoutPrompt(
+        workoutCount!,
+        place!,
+        equipmentList
+      );
 
-    navigate('/workouts/create/confirm');
-  }, [workoutCount, place, equipmentList, generateWorkoutPlan, setWorkoutData, navigate]);
+      const aiResponse = await askAI([{ role: 'user', content: prompt }]);
 
-  useEffect(() => {
-    return () => {
+      setWorkoutPlan(aiResponse.workouts);
+
+      navigate('/workouts/create/confirm');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+      setError(errorMessage);
+    } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [workoutCount, place, equipmentList, setWorkoutData, setWorkoutPlan, setError, navigate]);
 
   return (
     <LoadingOverlay isLoading={isLoading}>

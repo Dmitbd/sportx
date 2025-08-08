@@ -27,3 +27,16 @@ export type Training = {
 export type AIWorkoutResponse = {
   workouts: Training[];
 };
+
+export interface User {
+  id: number;
+  email: string;
+  name?: string;
+}
+
+export interface Workout {
+  id: string;
+  title: string;
+  exercises: string[];
+  createdAt: Date;
+}
