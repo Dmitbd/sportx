@@ -5,6 +5,12 @@ import type { Training } from '@/types';
 type LoginRequest = { email: string; password: string };
 type RegisterRequest = { email: string; password: string };
 type SaveWorkoutRequest = { workouts: Training[] };
+type Workout = {
+  id: string;
+  title: string;
+  exercises: string[];
+  createdAt: Date;
+};
 
 export const handlers = [
   // Авторизация
@@ -89,5 +95,34 @@ export const handlers = [
 
     // Успешное сохранение
     return new HttpResponse(null, { status: 201 });
+  }),
+
+  // Получение тренировок пользователя
+  http.get('/api/workouts', async () => {
+    await delay(300);
+
+    // Имитация данных тренировок
+    const mockWorkouts: Workout[] = [
+      {
+        id: '1',
+        title: 'Силовая тренировка',
+        exercises: ['Жим лёжа', 'Приседания', 'Тяга'],
+        createdAt: new Date('2023-05-15')
+      },
+      {
+        id: '2',
+        title: 'Кардио сессия',
+        exercises: ['Бег', 'Велосипед'],
+        createdAt: new Date('2023-05-10')
+      },
+      {
+        id: '3',
+        title: 'Домашняя тренировка с резинкой',
+        exercises: ['Приседания с резинкой', 'Отведение бедра', 'Разведение рук'],
+        createdAt: new Date('2023-05-08')
+      }
+    ];
+
+    return HttpResponse.json(mockWorkouts, { status: 200 });
   })
 ];

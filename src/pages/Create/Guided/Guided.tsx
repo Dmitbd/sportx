@@ -201,6 +201,7 @@ export const Guided = () => {
                 colorScheme="blue"
                 mt={4}
                 onClick={handleSubmit}
+                loading={isLoading}
               >
                 Продолжить
               </Button>
