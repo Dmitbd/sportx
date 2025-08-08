@@ -20,7 +20,6 @@ interface WorkoutState {
   place: string | null;
   equipment: EquipmentItem[];
   workoutPlan: Training[] | null;
-  isLoading: boolean;
   error: string | null;
   setWorkoutData: (data: {
     workoutCount: string | null;
@@ -41,7 +40,6 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
   place: null,
   equipment: [],
   workoutPlan: null,
-  isLoading: false,
   error: null,
 
   setWorkoutData: (data) => {
@@ -53,7 +51,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
   },
 
   generateWorkoutPlan: async (data) => {
-    set({ isLoading: true, error: null });
+    set({ error: null });
 
     try {
       const { workoutCount, place, equipment } = data;
@@ -108,7 +106,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
       const messages: AIMessage[] = [{ role: 'user', content: prompt }];
       const aiResponse = await askAI(messages);
 
-      set({ workoutPlan: aiResponse.workouts, isLoading: false })
+      set({ workoutPlan: aiResponse.workouts})
     } catch (error: unknown) {
       console.error('Ошибка генерации плана тренировок:', error);
 
@@ -122,15 +120,12 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
         errorMessage = error.response?.data?.message || error.message;
       }
 
-      set({
-        error: errorMessage,
-        isLoading: false
-      });
+      set({error: errorMessage});
     }
   },
 
   saveWorkoutPlan: async () => {
-    set({ isLoading: true, error: null });
+    set({ error: null });
 
     try {
       const currentState = useWorkoutStore.getState();
@@ -140,8 +135,6 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
       }
 
       await saveWorkout(currentState.workoutPlan);
-
-      set({ isLoading: false });
     } catch (error: unknown) {
       console.error('Ошибка сохранения тренировки:', error);
 
@@ -155,10 +148,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
         errorMessage = error.response?.data?.message || error.message;
       }
 
-      set({
-        error: errorMessage,
-        isLoading: false
-      });
+      set({error: errorMessage});
 
       throw error;
     }
@@ -169,7 +159,6 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
     place: null,
     equipment: [],
     workoutPlan: null,
-    isLoading: false,
     error: null
   })
 }));
