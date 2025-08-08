@@ -1,24 +1,25 @@
-import { Box, Button, Card, CardBody, Heading, Spinner, Stack, Text, Alert, Badge, Wrap } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import { Box, Button, Card, CardBody, Heading, Stack, Text, Alert, Badge, Wrap } from '@chakra-ui/react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 import { useWorkoutStore } from '@/stores/workoutStore';
 
 // TODO добавить редактирование упражнений/тренировки
+// TODO добавить индикатор о генерации плана для пользователя
 
 export const Confirm = () => {
+  const navigate = useNavigate();
+
   const {
     workoutPlan,
     isLoading,
     error,
+    saveWorkoutPlan,
   } = useWorkoutStore();
 
-  if (isLoading) {
-    return (
-      <Box textAlign="center" py={10}>
-        <Spinner size="xl" />
-        <Text mt={4}>Генерируем ваш персональный план тренировок...</Text>
-      </Box>
-    );
-  }
+  const handleSave = useCallback(async () => {
+    await saveWorkoutPlan();
+    navigate('/workouts');
+  }, [saveWorkoutPlan, navigate]);
 
   if (error) {
     return (
@@ -55,8 +56,7 @@ export const Confirm = () => {
           <Heading as="h2" size="md" mb={6}>
             Ваш план тренировок готов!
           </Heading>
-
-          {!isLoading && workoutPlan && workoutPlan.length > 0 ? (
+          {!isLoading && workoutPlan && workoutPlan.length && (
             <Stack gap={6}>
               {workoutPlan.map((workout, index) => (
                 <Box key={index} borderWidth="1px" borderRadius="lg" p={4}>
@@ -89,17 +89,26 @@ export const Confirm = () => {
                 </Box>
               ))}
 
-              <Button asChild colorScheme="green" mt={4}>
-                <Link to="/workouts">
-                  Сохранить
-                </Link>
+              <Button
+                colorScheme="green"
+                mt={4}
+                onClick={handleSave}
+                loading={isLoading}
+              >
+                Сохранить
               </Button>
             </Stack>
-          ) : (
-            <Text>Не удалось сгенерировать план тренировок</Text>
           )}
         </CardBody>
       </Card.Root>
+      {
+        isLoading && (
+          // TODO: еще нужно подумать над реализацией 
+          // (делать disabled для элементов на экране 
+          // или компонент обертку с overlay) <- это звучит проще
+          <Box pos="absolute" inset="0" bg="bg/80" h="full" w="full" />
+        )
+      }
     </Box>
   );
 };

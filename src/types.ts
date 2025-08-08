@@ -25,5 +25,5 @@ export type Training = {
 }
 
 export type AIWorkoutResponse = {
-  trainings: Training[];
+  workouts: Training[];
 };

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { EquipmentItem } from '../pages/Create/types';
 import { askAI } from '@/services/aiService';
+import { saveWorkout } from '@/services/workoutService';
 import type { AIMessage, Training } from '@/types';
 import axios from 'axios';
 
@@ -31,6 +32,7 @@ interface WorkoutState {
     place: string | null;
     equipment: EquipmentItem[];
   }) => Promise<void>;
+  saveWorkoutPlan: () => Promise<void>;
   reset: () => void;
 }
 
@@ -84,7 +86,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
    - Количество повторений (reps)
 
 ### Формат ответа (только JSON):
-  "trainings": [
+  "workouts": [
     {
       "name": "Название тренировки",
       "exercises": [
@@ -106,7 +108,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
       const messages: AIMessage[] = [{ role: 'user', content: prompt }];
       const aiResponse = await askAI(messages);
 
-      set({ workoutPlan: aiResponse.trainings, isLoading: false })
+      set({ workoutPlan: aiResponse.workouts, isLoading: false })
     } catch (error: unknown) {
       console.error('Ошибка генерации плана тренировок:', error);
 
@@ -119,11 +121,46 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
       } else if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
       }
-      
+
       set({
         error: errorMessage,
         isLoading: false
       });
+    }
+  },
+
+  saveWorkoutPlan: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const currentState = useWorkoutStore.getState();
+
+      if (!currentState.workoutPlan || currentState.workoutPlan.length === 0) {
+        throw new Error('Нет данных для сохранения');
+      }
+
+      await saveWorkout(currentState.workoutPlan);
+
+      set({ isLoading: false });
+    } catch (error: unknown) {
+      console.error('Ошибка сохранения тренировки:', error);
+
+      let errorMessage = 'Не удалось сохранить тренировку';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message;
+      }
+
+      set({
+        error: errorMessage,
+        isLoading: false
+      });
+
+      throw error;
     }
   },
 

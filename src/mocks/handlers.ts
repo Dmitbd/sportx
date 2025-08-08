@@ -1,9 +1,10 @@
 import { HttpResponse, delay, http } from 'msw';
 import aiResponse from './aiResponse.json';
-
+import type { Training } from '@/types';
 
 type LoginRequest = { email: string; password: string };
 type RegisterRequest = { email: string; password: string };
+type SaveWorkoutRequest = { workouts: Training[] };
 
 export const handlers = [
   // Авторизация
@@ -71,5 +72,22 @@ export const handlers = [
         }
       ]
     }, { status: 200 });
+  }),
+
+  // Сохранение тренировки
+  http.post('/api/workouts/create/confirm', async ({ request }) => {
+    const { workouts } = await request.json() as SaveWorkoutRequest;
+    await delay(500);
+
+    // Валидация данных
+    if (!workouts || !Array.isArray(workouts) || workouts.length === 0) {
+      return HttpResponse.json(
+        { message: 'Неверные данные тренировки' },
+        { status: 400 }
+      );
+    }
+
+    // Успешное сохранение
+    return new HttpResponse(null, { status: 201 });
   })
 ];
