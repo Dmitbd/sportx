@@ -124,5 +124,38 @@ export const handlers = [
     ];
 
     return HttpResponse.json(mockWorkouts, { status: 200 });
+  }),
+
+  // Получение тренировки по id
+  http.get('/api/workouts/:id', async ({ params }) => {
+    await delay(200);
+    const { id } = params;
+    const mockTrainings: Training[] = [
+      {
+        name: 'Силовая тренировка',
+        exercises: [
+          { name: 'Жим лёжа', description: 'Жим штанги лёжа', sets: 4, reps: 8, muscles: ['грудные', 'трицепс'] },
+          { name: 'Приседания', description: 'Классические приседания', sets: 4, reps: 10, muscles: ['квадрицепс', 'ягодицы'] },
+        ]
+      },
+      {
+        name: 'Кардио сессия',
+        exercises: [
+          { name: 'Бег', description: 'Бег на дорожке', sets: 1, reps: 30, muscles: ['сердце', 'ноги'] },
+        ]
+      },
+      {
+        name: 'Домашняя тренировка с резинкой',
+        exercises: [
+          { name: 'Приседания с резинкой', description: 'Приседания с эспандером', sets: 3, reps: 12, muscles: ['ягодицы', 'бедра'] },
+        ]
+      }
+    ];
+    const idx = ['1', '2', '3'].indexOf(id as string);
+    const training = mockTrainings[idx];
+    if (!training) {
+      return HttpResponse.json({ message: 'Тренировка не найдена' }, { status: 404 });
+    }
+    return HttpResponse.json(training, { status: 200 });
   })
 ];

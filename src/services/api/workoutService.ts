@@ -9,5 +9,10 @@ export const workoutService = {
 
   saveWorkout: async (workouts: Training[]): Promise<void> => {
     await httpClient.post('/workouts/create/confirm', { workouts });
-  }
+  },
+
+  getWorkout: async (id: string): Promise<Training> => {
+    const { data } = await httpClient.get<Training>(`/workouts/${id}`);
+    return data;
+  },
 };

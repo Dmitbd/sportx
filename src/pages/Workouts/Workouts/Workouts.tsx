@@ -114,21 +114,31 @@ export const Workouts = () => {
       ) : (
         <Stack gap={4}>
           {workouts.map(workout => (
-            <Card.Root key={workout.id} variant="outline">
-              <Card.Body>
-                <Flex align="center">
-                  <Box flex="1">
-                    <Heading size="md">{workout.title}</Heading>
-                    <Text color="gray.600" mt={1}>
-                      {workout.exercises.join(', ')}
-                    </Text>
-                    <Text fontSize="sm" color="gray.500" mt={1}>
-                      Создано: {workout.createdAt instanceof Date ? workout.createdAt.toLocaleDateString('ru-RU') : new Date(workout.createdAt).toLocaleDateString('ru-RU')}
-                    </Text>
-                  </Box>
-                </Flex>
-              </Card.Body>
-            </Card.Root>
+            <RouterLink
+              key={workout.id}
+              to={`/workouts/${workout.id}`}
+              style={{ textDecoration: 'none' }}
+            >
+              <Card.Root variant="outline">
+                <Card.Body>
+                  <Flex align="center">
+                    <Box flex="1">
+                      <Heading size="md">{workout.title}</Heading>
+                      <Text color="gray.600" mt={1}>
+                        {workout.exercises.join(', ')}
+                      </Text>
+                      <Text fontSize="sm" color="gray.500" mt={1}>
+                        Создано: {
+                          workout.createdAt instanceof Date
+                            ? workout.createdAt.toLocaleDateString('ru-RU')
+                            : new Date(workout.createdAt).toLocaleDateString('ru-RU')
+                        }
+                      </Text>
+                    </Box>
+                  </Flex>
+                </Card.Body>
+              </Card.Root>
+            </RouterLink>
           ))}
         </Stack>
       )}
