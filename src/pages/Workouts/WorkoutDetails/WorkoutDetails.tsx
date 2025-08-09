@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Box, Heading, Text, Spinner, Alert } from '@chakra-ui/react';
+import { Box, Heading, Text, Spinner, Alert, Badge, Stack, HStack, Card, Collapsible } from '@chakra-ui/react';
 import { workoutService } from '@/services/api/workoutService';
 import type { Training } from '@/types';
 
@@ -41,17 +41,55 @@ export const WorkoutDetails = () => {
   return (
     <Box p={6}>
       <Heading as="h2" size="lg">{training.name}</Heading>
-      <Box mt={4}>
-        <Heading as="h3" size="md" mb={2}>Упражнения:</Heading>
+
+      <Stack gap={4} mt={4}>
         {training.exercises.map((ex, idx) => (
-          <Box key={idx} mb={3} p={3} borderWidth={1} borderRadius="md">
-            <Text fontWeight="bold">{ex.name}</Text>
-            <Text color="gray.600">{ex.description}</Text>
-            <Text>Подходы: {ex.sets}, Повторения: {ex.reps}</Text>
-            <Text color="gray.500">Мышцы: {ex.muscles.join(', ')}</Text>
-          </Box>
+          <Card.Root key={`${ex.name}-${idx}`} flexDirection="row" overflow="hidden" maxW="xl">
+            {/* Без изображения, как просили */}
+            <Box flex="1">
+              <Card.Body>
+                <Card.Title mb="2">{ex.name}</Card.Title>
+
+                <HStack mt="2" gap="2" wrap="wrap">
+                  {ex.muscles.map((muscle) => (
+                    <Badge key={muscle} colorPalette="purple" variant="subtle">
+                      {muscle}
+                    </Badge>
+                  ))}
+                </HStack>
+
+                <Box mt="4">
+                  <Heading as="h4" size="sm" mb={2}>Подходы</Heading>
+                  <Stack gap={2}>
+                    {Array.from({ length: ex.sets }, (_, i) => (
+                      <HStack key={i} justify="space-between" align="center">
+                        <Text>Подход {i + 1}</Text>
+                        <HStack gap={6}>
+                          <Text color="gray.600">Вес: —</Text>
+                          <Text color="gray.600">Повторения: {ex.reps}</Text>
+                        </HStack>
+                      </HStack>
+                    ))}
+                  </Stack>
+                </Box>
+              </Card.Body>
+
+              <Card.Footer>
+                <Collapsible.Root>
+                  <Collapsible.Trigger paddingY="3">
+                    Описание
+                  </Collapsible.Trigger>
+                  <Collapsible.Content>
+                    <Box padding="4" borderWidth="1px">
+                      <Text color="gray.600">{ex.description}</Text>
+                    </Box>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              </Card.Footer>
+            </Box>
+          </Card.Root>
         ))}
-      </Box>
+      </Stack>
     </Box>
   );
 };
