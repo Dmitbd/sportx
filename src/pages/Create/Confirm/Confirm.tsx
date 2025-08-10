@@ -88,7 +88,8 @@ export const Confirm = () => {
                         <Box key={exIndex} borderWidth="1px" borderRadius="lg" p={4} borderColor="border.disabled" color="fg.disabled">
                           <Text fontSize="sm" fontWeight="bold">{exercise.name}</Text>
                           <Text fontSize="sm">
-                            {exercise.sets} подходов × {exercise.reps} повторений
+                            {exercise.sets.length} подходов
+                            {typeof exercise.sets?.[0]?.[1] === 'number' ? ` × ${exercise.sets[0][1]} повторений` : ''}
                           </Text>
                           <Text fontSize="sm" fontWeight="bold">Техника выполнения</Text>
                           <Text fontSize="sm">{exercise.description}</Text>

@@ -8,5 +8,6 @@
 - Формы: React Hook Form + Yup
 - API клиент: Axios
 - Backend: имитация через Mock Service Worker (MSW)
+- Функциональная библиотека: Remeda
 - Сструктура папок feature-based
 - Сборщик: Vite

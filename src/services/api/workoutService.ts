@@ -1,4 +1,4 @@
-import type { Training, Workout } from '@/types';
+import type {  Training, UpdateWorkoutSets, Workout } from '@/types';
 import httpClient from './httpClient';
 
 export const workoutService = {
@@ -13,6 +13,11 @@ export const workoutService = {
 
   getWorkout: async (id: string): Promise<Training> => {
     const { data } = await httpClient.get<Training>(`/workouts/${id}`);
+    return data;
+  },
+
+  updateWorkoutSets: async (id: string, payload: UpdateWorkoutSets): Promise<UpdateWorkoutSets> => {
+    const { data } = await httpClient.patch<UpdateWorkoutSets>(`/workouts/${id}/sets`, payload);
     return data;
   },
 };

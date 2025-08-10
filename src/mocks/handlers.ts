@@ -1,6 +1,6 @@
 import { HttpResponse, delay, http } from 'msw';
 import aiResponse from './aiResponse.json';
-import type { Training } from '@/types';
+import type { Training, UpdateWorkoutSets } from '@/types';
 
 type LoginRequest = { email: string; password: string };
 type RegisterRequest = { email: string; password: string };
@@ -134,20 +134,20 @@ export const handlers = [
       {
         name: 'Силовая тренировка',
         exercises: [
-          { name: 'Жим лёжа', description: 'Жим штанги лёжа', sets: 4, reps: 8, muscles: ['грудные', 'трицепс'] },
-          { name: 'Приседания', description: 'Классические приседания', sets: 4, reps: 10, muscles: ['квадрицепс', 'ягодицы'] },
+          { name: 'Жим лёжа', description: 'Жим штанги лёжа', sets: [[0, 8], [0, 8], [0, 8], [0, 8]], muscles: ['грудные', 'трицепс'] },
+          { name: 'Приседания', description: 'Классические приседания', sets: [[0, 10], [0, 10], [0, 10], [0, 10]], muscles: ['квадрицепс', 'ягодицы'] },
         ]
       },
       {
         name: 'Кардио сессия',
         exercises: [
-          { name: 'Бег', description: 'Бег на дорожке', sets: 1, reps: 30, muscles: ['сердце', 'ноги'] },
+          { name: 'Бег', description: 'Бег на дорожке', sets: [[0, 30]], muscles: ['сердце', 'ноги'] },
         ]
       },
       {
         name: 'Домашняя тренировка с резинкой',
         exercises: [
-          { name: 'Приседания с резинкой', description: 'Приседания с эспандером', sets: 3, reps: 12, muscles: ['ягодицы', 'бедра'] },
+          { name: 'Приседания с резинкой', description: 'Приседания с эспандером', sets: [[0, 12], [0, 12], [0, 12], [0, 12]], muscles: ['ягодицы', 'бедра'] },
         ]
       }
     ];
@@ -157,5 +157,22 @@ export const handlers = [
       return HttpResponse.json({ message: 'Тренировка не найдена' }, { status: 404 });
     }
     return HttpResponse.json(training, { status: 200 });
+  }),
+
+  // Сохранение изменений в подходах упражнения
+  http.patch('/api/workouts/:id/sets', async ({ request, params }) => {
+    await delay(300);
+    const { id } = params;
+
+    const body = await request.json() as UpdateWorkoutSets;
+
+    if (!id || !body || !Array.isArray(body.exercises)) {
+      return HttpResponse.json({ message: 'Неверные данные' }, { status: 400 });
+    }
+
+    // Возвращаем обновленные данные, как должен делать реальный бэкенд
+    return HttpResponse.json({
+      exercises: body.exercises
+    }, { status: 200 });
   })
 ];
