@@ -4,12 +4,14 @@ import { Box, Heading, Text, Spinner, Alert, Badge, Stack, HStack, Card, Collaps
 import { workoutService } from '@/services/api/workoutService';
 import type { Training, UpdateWorkoutSets } from '@/types';
 import { filter, isDeepEqual, isNullish, map, pipe } from 'remeda';
+import { useNavigate } from 'react-router-dom';
+import { BackButton } from '@/shared';
 
 /**
  * TODO:
  * валидация чисел и отрицательных значений
  * фиксированный размер инпутов что бы не прыгали
- * кг”/“повт.” внутри превью
+ * кг"/"повт." внутри превью
  * при изменении и "отмене" повторный ввод не вызывает экшн бар
  * вынести одинаковый код в функции
  * вынести большие функции в utils
@@ -18,6 +20,7 @@ import { filter, isDeepEqual, isNullish, map, pipe } from 'remeda';
 
 export const WorkoutDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [initialTraining, setInitialTraining] = useState<Training | null>(null);
   const [training, setTraining] = useState<Training | null>(null);
@@ -197,6 +200,11 @@ export const WorkoutDetails = () => {
 
   return (
     <Box p={6}>
+      <BackButton
+        variant="plain"
+        ariaLabel="Назад к тренировкам"
+      />
+
       <Heading
         as="h2"
         size="lg"

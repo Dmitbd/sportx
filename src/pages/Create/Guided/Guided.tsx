@@ -8,6 +8,7 @@ import { useWorkoutStore } from "@/stores/workoutStore";
 import { LoadingOverlay } from "@/components";
 import { promptService } from "@/services";
 import { askAI } from "@/services";
+import { BackButton } from "@/shared";
 
 /**
  * @description Страница c формой сбора данных для создания плана тренировок
@@ -67,6 +68,11 @@ export const Guided = () => {
         mt={10}
         position="relative"
       >
+        <BackButton
+          variant="plain"
+          ariaLabel="Назад к тренировкам"
+        />
+
         <Card.Root>
           <CardBody>
             <Heading
