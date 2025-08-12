@@ -1,14 +1,7 @@
 import { IconButton } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { GoChevronLeft } from "react-icons/go";
-import type { ButtonVariant } from "node_modules/@chakra-ui/react/dist/types/styled-system/generated/recipes.gen";
-
-interface BackButtonProps {
-  to?: string;
-  ariaLabel?: string;
-  variant?: ButtonVariant['variant'];
-  size?: ButtonVariant['size'];
-}
+import type { BackButtonProps } from "./types";
 
 /**
  * @description Переиспользуемый компонент кнопки "Назад" с иконкой

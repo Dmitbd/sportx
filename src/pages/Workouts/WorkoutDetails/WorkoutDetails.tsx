@@ -1,11 +1,12 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Heading, Text, Spinner, Alert, Badge, Stack, HStack, Card, Collapsible, Button, Editable, ActionBar, Portal } from '@chakra-ui/react';
+import { Box, Heading, Text, Spinner, Alert, Badge, Stack, HStack, Card, Collapsible, Button, Editable, ActionBar, Portal, IconButton, Dialog, Center } from '@chakra-ui/react';
+import { FiTrash2 } from 'react-icons/fi';
 import { workoutService } from '@/services/api/workoutService';
 import type { Training, UpdateWorkoutSets } from '@/types';
 import { filter, isDeepEqual, isNullish, map, pipe } from 'remeda';
-import { useNavigate } from 'react-router-dom';
 import { BackButton } from '@/shared';
+import { LoadingOverlay } from '@/components';
 
 /**
  * TODO:
@@ -29,6 +30,8 @@ export const WorkoutDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // принудительный ключ для компонента Editable.Root из-за его специфичного обновления
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -166,6 +169,35 @@ export const WorkoutDetails = () => {
     setForceUpdate(prev => prev + 1);
   }, [initialTraining]);
 
+  const handleDelete = useCallback(async () => {
+    if (isNullish(id)) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setError(null);
+
+      await workoutService.deleteWorkout(id);
+
+      navigate('/workouts');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Ошибка удаления';
+      setError(message);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  }, [id, navigate]);
+
+  const onDeleteDialogOpenChange = useCallback(({ open }: { open: boolean }) => {
+    if (isDeleting) {
+      return;
+    }
+
+    setIsDeleteDialogOpen(open);
+  }, [isDeleting]);
+
   useEffect(() => {
     if (isNullish(id)) {
       return;
@@ -188,150 +220,217 @@ export const WorkoutDetails = () => {
     fetchWorkout();
   }, [id]);
 
+  // TODO: подумать как отображать загрузку деталей тренировки
   if (isLoading) {
-    return <Spinner size="xl" />;
+    return (
+      <Box pos="absolute" inset="0" bg="bg/80">
+        <Center h="full">
+          <Spinner size="xl" />
+        </Center>
+      </Box>
+    );
   }
+
   if (error) {
-    return <Alert.Root status="error">{error}</Alert.Root>;
+    return (
+      <Alert.Root status="error">
+        {error}
+      </Alert.Root>
+    );
   }
+  
   if (!training) {
-    return <Text>Тренировка не найдена</Text>;
+    return (
+      <Alert.Root status="error">
+        Тренировка не найдена
+      </Alert.Root>
+    );
   }
 
   return (
-    <Box p={6}>
-      <BackButton
-        variant="plain"
-        ariaLabel="Назад к тренировкам"
-      />
+    <LoadingOverlay isLoading={isDeleting}>
+      <Box p={6}>
+        <BackButton
+          variant="plain"
+          ariaLabel="Назад к тренировкам"
+        />
 
-      <Heading
-        as="h2"
-        size="lg"
-      >
-        {training.name}
-      </Heading>
-
-      <Stack gap={4} mt={4}>
-        {training.exercises.map((exercise, exerciseIndex) => (
-          <Card.Root
-            key={`${exercise.name}-${exerciseIndex}`}
-            flexDirection="row"
-            overflow="hidden"
-            maxW="xl"
+        <HStack justify="space-between" align="center" mb={4}>
+          <Heading
+            as="h2"
+            size="lg"
           >
-            <Box flex="1">
-              <Card.Body>
-                <Card.Title mb="2">{exercise.name}</Card.Title>
+            {training.name}
+          </Heading>
 
-                <HStack mt="2" gap="2" wrap="wrap">
-                  {exercise.muscles.map((muscle) => (
-                    <Badge key={muscle} colorPalette="purple" variant="subtle">
-                      {muscle}
-                    </Badge>
-                  ))}
-                </HStack>
+          <IconButton
+            aria-label="Удалить тренировку"
+            variant="ghost"
+            colorScheme="red"
+            size="sm"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
+            <FiTrash2 />
+          </IconButton>
+        </HStack>
 
-                <Box mt="4">
-                  <Heading as="h4" size="sm" mb={2}>
-                    Подходы
-                  </Heading>
-                  <Stack gap={2}>
-                    {exercise.sets.map((set, setIndex) => (
-                      <HStack
-                        key={setIndex}
-                        justify="space-between"
-                        align="center"
-                      >
-                        <Text minW="80px">
-                          Подход {setIndex + 1}
-                        </Text>
-                        <HStack gap={6} align="center">
-                          <HStack gap={2} align="center">
-                            <Text color="gray.600">
-                              Вес:
-                            </Text>
-                            <Editable.Root
-                              key={`${exercise.name}-${setIndex}-weight-${forceUpdate}`}
-                              textAlign="start"
-                              value={String(set[0])}
-                              onValueChange={({ value }) => handleChange({
-                                exerciseName: exercise.name,
-                                setIndex,
-                                field: 'weight',
-                                value
-                              })}
-                              maxW="40px"
-                            >
-                              <Editable.Preview width='40px' />
-                              <Editable.Input />
-                            </Editable.Root>
-                          </HStack>
-                          <HStack gap={2} align="center">
-                            <Text color="gray.600">
-                              Повторения:
-                            </Text>
-                            <Editable.Root
-                              key={`${exercise.name}-${setIndex}-reps-${forceUpdate}`}
-                              textAlign="start"
-                              value={String(set[1])}
-                              onValueChange={({ value }) => handleChange({
-                                exerciseName: exercise.name,
-                                setIndex,
-                                field: 'reps',
-                                value
-                              })}
-                              maxW="40px"
-                            >
-                              <Editable.Preview width='40px' />
-                              <Editable.Input />
-                            </Editable.Root>
+        <Stack gap={4} mt={4}>
+          {training.exercises.map((exercise, exerciseIndex) => (
+            <Card.Root
+              key={`${exercise.name}-${exerciseIndex}`}
+              flexDirection="row"
+              overflow="hidden"
+              maxW="xl"
+            >
+              <Box flex="1">
+                <Card.Body>
+                  <Card.Title mb="2">{exercise.name}</Card.Title>
+
+                  <HStack mt="2" gap="2" wrap="wrap">
+                    {exercise.muscles.map((muscle) => (
+                      <Badge key={muscle} colorPalette="purple" variant="subtle">
+                        {muscle}
+                      </Badge>
+                    ))}
+                  </HStack>
+
+                  <Box mt="4">
+                    <Heading as="h4" size="sm" mb={2}>
+                      Подходы
+                    </Heading>
+                    <Stack gap={2}>
+                      {exercise.sets.map((set, setIndex) => (
+                        <HStack
+                          key={setIndex}
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Text minW="80px">
+                            Подход {setIndex + 1}
+                          </Text>
+                          <HStack gap={6} align="center">
+                            <HStack gap={2} align="center">
+                              <Text color="gray.600">
+                                Вес:
+                              </Text>
+                              <Editable.Root
+                                key={`${exercise.name}-${setIndex}-weight-${forceUpdate}`}
+                                textAlign="start"
+                                value={String(set[0])}
+                                onValueChange={({ value }) => handleChange({
+                                  exerciseName: exercise.name,
+                                  setIndex,
+                                  field: 'weight',
+                                  value
+                                })}
+                                maxW="40px"
+                              >
+                                <Editable.Preview width='40px' />
+                                <Editable.Input />
+                              </Editable.Root>
+                            </HStack>
+                            <HStack gap={2} align="center">
+                              <Text color="gray.600">
+                                Повторения:
+                              </Text>
+                              <Editable.Root
+                                key={`${exercise.name}-${setIndex}-reps-${forceUpdate}`}
+                                textAlign="start"
+                                value={String(set[1])}
+                                onValueChange={({ value }) => handleChange({
+                                  exerciseName: exercise.name,
+                                  setIndex,
+                                  field: 'reps',
+                                  value
+                                })}
+                                maxW="40px"
+                              >
+                                <Editable.Preview width='40px' />
+                                <Editable.Input />
+                              </Editable.Root>
+                            </HStack>
                           </HStack>
                         </HStack>
-                      </HStack>
-                    ))}
-                  </Stack>
-                </Box>
-              </Card.Body>
+                      ))}
+                    </Stack>
+                  </Box>
+                </Card.Body>
 
-              <Card.Footer>
-                <Collapsible.Root>
-                  <Collapsible.Trigger paddingY="3">
-                    Описание
-                  </Collapsible.Trigger>
-                  <Collapsible.Content>
-                    <Box padding="4" borderWidth="1px">
-                      <Text color="gray.600">{exercise.description}</Text>
-                    </Box>
-                  </Collapsible.Content>
-                </Collapsible.Root>
-              </Card.Footer>
-            </Box>
-          </Card.Root>
-        ))}
-      </Stack>
+                <Card.Footer>
+                  <Collapsible.Root>
+                    <Collapsible.Trigger paddingY="3">
+                      Описание
+                    </Collapsible.Trigger>
+                    <Collapsible.Content>
+                      <Box padding="4" borderWidth="1px">
+                        <Text color="gray.600">{exercise.description}</Text>
+                      </Box>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
+                </Card.Footer>
+              </Box>
+            </Card.Root>
+          ))}
+        </Stack>
 
-      <ActionBar.Root open={hasChanges}>
-        <Portal>
-          <ActionBar.Positioner>
-            <ActionBar.Content>
-              <Text>Есть несохраненные изменения</Text>
-              <ActionBar.Separator />
-              <HStack gap={2}>
-                <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
-                  Отменить
-                </Button>
-                <Button colorScheme="blue" size="sm" onClick={handleSave} disabled={isSaving} loading={isSaving}>
-                  Сохранить
-                </Button>
-              </HStack>
-              {saveSuccess && (
-                <Badge ml={3} colorPalette="green" variant="subtle">{saveSuccess}</Badge>
-              )}
-            </ActionBar.Content>
-          </ActionBar.Positioner>
-        </Portal>
-      </ActionBar.Root>
-    </Box>
+        <ActionBar.Root open={hasChanges}>
+          <Portal>
+            <ActionBar.Positioner>
+              <ActionBar.Content>
+                <Text>Есть несохраненные изменения</Text>
+                <ActionBar.Separator />
+                <HStack gap={2}>
+                  <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
+                    Отменить
+                  </Button>
+                  <Button colorScheme="blue" size="sm" onClick={handleSave} disabled={isSaving} loading={isSaving}>
+                    Сохранить
+                  </Button>
+                </HStack>
+                {saveSuccess && (
+                  <Badge ml={3} colorPalette="green" variant="subtle">{saveSuccess}</Badge>
+                )}
+              </ActionBar.Content>
+            </ActionBar.Positioner>
+          </Portal>
+        </ActionBar.Root>
+
+        <Dialog.Root
+          open={isDeleteDialogOpen}
+          onOpenChange={onDeleteDialogOpenChange}
+        >
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Удалить тренировку</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Text>Вы уверены, что хотите удалить "{training.name}"?</Text>
+                <Text>Это действие нельзя отменить.</Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <HStack gap={2}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                    disabled={isDeleting}
+                  >
+                    Отмена
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    loading={isDeleting}
+                  >
+                    Удалить
+                  </Button>
+                </HStack>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      </Box>
+    </LoadingOverlay>
   );
 };

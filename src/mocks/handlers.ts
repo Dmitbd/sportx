@@ -16,7 +16,7 @@ export const handlers = [
   // Авторизация
   http.post('/api/auth/login', async ({ request }) => {
     const { email, password } = await request.json() as LoginRequest;
-    await delay(200);
+    await delay(1000);
 
     // Валидация данных
     if (email === 'user@test.com' && password === '12345') {
@@ -35,7 +35,7 @@ export const handlers = [
   // Регистрация
   http.post('/api/auth/register', async ({ request }) => {
     const { email, password } = await request.json() as RegisterRequest;
-    await delay(200);
+    await delay(1000);
 
     // Валидация данных
     if (!email || !password) {
@@ -62,13 +62,13 @@ export const handlers = [
 
   // Выход
   http.post('/api/auth/logout', async () => {
-    await delay(100);
+    await delay(1000);
     return HttpResponse.json({ success: true }, { status: 200 });
   }),
 
   // Запрос к LLM
   http.post('/api/v1/chat/completions', async () => {
-    await delay(1000);
+    await delay(10000);
     return HttpResponse.json({
       choices: [
         {
@@ -83,7 +83,7 @@ export const handlers = [
   // Сохранение тренировки
   http.post('/api/workouts/create/confirm', async ({ request }) => {
     const { workouts } = await request.json() as SaveWorkoutRequest;
-    await delay(500);
+    await delay(1000);
 
     // Валидация данных
     if (!workouts || !Array.isArray(workouts) || workouts.length === 0) {
@@ -99,7 +99,7 @@ export const handlers = [
 
   // Получение тренировок пользователя
   http.get('/api/workouts', async () => {
-    await delay(300);
+    await delay(1000);
 
     // Имитация данных тренировок
     const mockWorkouts: Workout[] = [
@@ -128,7 +128,7 @@ export const handlers = [
 
   // Получение тренировки по id
   http.get('/api/workouts/:id', async ({ params }) => {
-    await delay(200);
+    await delay(1000);
     const { id } = params;
     const mockTrainings: Training[] = [
       {
@@ -161,7 +161,7 @@ export const handlers = [
 
   // Сохранение изменений в подходах упражнения
   http.patch('/api/workouts/:id/sets', async ({ request, params }) => {
-    await delay(300);
+    await delay(1000);
     const { id } = params;
 
     const body = await request.json() as UpdateWorkoutSets;
@@ -174,5 +174,24 @@ export const handlers = [
     return HttpResponse.json({
       exercises: body.exercises
     }, { status: 200 });
+  }),
+
+  // Удаление тренировки
+  http.delete('/api/workouts/:id', async ({ params }) => {
+    await delay(1000);
+    const { id } = params;
+
+    if (!id) {
+      return HttpResponse.json({ message: 'ID тренировки не указан' }, { status: 400 });
+    }
+
+    // Проверяем существование тренировки (имитация)
+    const validIds = ['1', '2', '3'];
+    if (!validIds.includes(id as string)) {
+      return HttpResponse.json({ message: 'Тренировка не найдена' }, { status: 404 });
+    }
+
+    // Успешное удаление
+    return HttpResponse.json({ message: 'Тренировка удалена' }, { status: 200 });
   })
 ];

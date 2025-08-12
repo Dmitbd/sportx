@@ -40,32 +40,6 @@ export const Workouts = () => {
     fetchWorkouts();
   }, []);
 
-  if (isLoading) {
-    return (
-      <Box p={6}>
-        <LoadingOverlay isLoading={true}>
-          <Box>
-            <Flex mb={8} align="center">
-              <Heading as="h1" size="xl">Мои тренировки</Heading>
-              <Spacer />
-            </Flex>
-            <Stack gap={4}>
-              {[1, 2, 3].map(i => (
-                <Card.Root key={i} variant="outline">
-                  <Card.Body>
-                    <Box>
-                      <Heading size="md">Загрузка...</Heading>
-                    </Box>
-                  </Card.Body>
-                </Card.Root>
-              ))}
-            </Stack>
-          </Box>
-        </LoadingOverlay>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Box p={6}>
@@ -86,62 +60,59 @@ export const Workouts = () => {
   }
 
   return (
-    <Box p={6}>
-      <Flex mb={8} align="center">
-        <Heading as="h1" size="xl">Мои тренировки</Heading>
-        <Spacer />
-        <RouterLink to="/workouts/create">
-          <Button colorScheme="blue">
-            <Icon size="lg" color="pink.700">
-              <HiViewGridAdd />
-            </Icon>
-            Новая тренировка
-          </Button>
-        </RouterLink>
-      </Flex>
-
-      {workouts.length === 0 ? (
-        <Box textAlign="center" py={10}>
-          <Text fontSize="lg" color="gray.500" mb={4}>
-            У вас пока нет тренировок
-          </Text>
+    <LoadingOverlay isLoading={isLoading}>
+      <Box p={6}>
+        <Flex mb={8} align="center">
+          <Heading as="h1" size="xl">Мои тренировки</Heading>
+          <Spacer />
           <RouterLink to="/workouts/create">
             <Button colorScheme="blue">
-              Создать первую тренировку
+              <Icon size="lg" color="pink.700">
+                <HiViewGridAdd />
+              </Icon>
+              Новая тренировка
             </Button>
           </RouterLink>
-        </Box>
-      ) : (
-        <Stack gap={4}>
-          {workouts.map(workout => (
-            <RouterLink
-              key={workout.id}
-              to={`/workouts/${workout.id}`}
-              style={{ textDecoration: 'none' }}
-            >
-              <Card.Root variant="outline">
-                <Card.Body>
-                  <Flex align="center">
-                    <Box flex="1">
-                      <Heading size="md">{workout.title}</Heading>
-                      <Text color="gray.600" mt={1}>
-                        {workout.exercises.join(', ')}
-                      </Text>
-                      <Text fontSize="sm" color="gray.500" mt={1}>
-                        Создано: {
-                          workout.createdAt instanceof Date
-                            ? workout.createdAt.toLocaleDateString('ru-RU')
-                            : new Date(workout.createdAt).toLocaleDateString('ru-RU')
-                        }
-                      </Text>
-                    </Box>
-                  </Flex>
-                </Card.Body>
-              </Card.Root>
-            </RouterLink>
-          ))}
-        </Stack>
-      )}
-    </Box>
+        </Flex>
+
+        {!isLoading && workouts.length === 0 ? (
+          <Box textAlign="center" py={10}>
+            <Text fontSize="lg" color="gray.500" mb={4}>
+              У вас пока нет тренировок
+            </Text>
+          </Box>
+        ) : (
+          <Stack gap={4}>
+            {workouts.map(workout => (
+              <RouterLink
+                key={workout.id}
+                to={`/workouts/${workout.id}`}
+                style={{ textDecoration: 'none' }}
+              >
+                <Card.Root variant="outline">
+                  <Card.Body>
+                    <Flex align="center">
+                      <Box flex="1">
+                        <Heading size="md">{workout.title}</Heading>
+                        <Text color="gray.600" mt={1}>
+                          {workout.exercises.join(', ')}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500" mt={1}>
+                          Создано: {
+                            workout.createdAt instanceof Date
+                              ? workout.createdAt.toLocaleDateString('ru-RU')
+                              : new Date(workout.createdAt).toLocaleDateString('ru-RU')
+                          }
+                        </Text>
+                      </Box>
+                    </Flex>
+                  </Card.Body>
+                </Card.Root>
+              </RouterLink>
+            ))}
+          </Stack>
+        )}
+      </Box>
+    </LoadingOverlay>
   );
 };
