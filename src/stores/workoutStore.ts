@@ -9,6 +9,8 @@ import type { Training } from '@/types';
  */
 
 interface WorkoutState {
+  gender: string | null;
+  experience: string | null;
   workoutCount: string | null;
   place: string | null;
   equipment: EquipmentItem[];
@@ -16,6 +18,8 @@ interface WorkoutState {
   error: string | null;
 
   setWorkoutData: (data: {
+    gender: string | null;
+    experience: string | null;
     workoutCount: string | null;
     place: string | null;
     equipment: EquipmentItem[];
@@ -27,6 +31,8 @@ interface WorkoutState {
 }
 
 export const useWorkoutStore = create<WorkoutState>((set) => ({
+  gender: null,
+  experience: null,
   workoutCount: null,
   place: null,
   equipment: [],
@@ -35,6 +41,8 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
 
   setWorkoutData: (data) => {
     set({
+      gender: data.gender,
+      experience: data.experience,
       workoutCount: data.workoutCount,
       place: data.place,
       equipment: data.equipment
@@ -50,6 +58,8 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
   },
 
   reset: () => set({
+    gender: null,
+    experience: null,
     workoutCount: null,
     place: null,
     equipment: [],

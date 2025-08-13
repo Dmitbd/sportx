@@ -1,4 +1,4 @@
-import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack } from "@chakra-ui/react";
+import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,8 @@ import { BackButton } from "@/shared";
  */
 export const Guided = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [gender, setGender] = useState<string | null>(null);
+  const [experience, setExperience] = useState<string | null>(null);
   const [workoutCount, setWorkoutCount] = useState<string | null>(null);
   const [place, setPlace] = useState<string | null>(null);
   const [hasHomeEquipment, setHasHomeEquipment] = useState<string | null>(null);
@@ -36,6 +38,8 @@ export const Guided = () => {
       setError(null);
 
       setWorkoutData({
+        gender,
+        experience,
         workoutCount,
         place,
         equipment: equipmentList
@@ -58,7 +62,7 @@ export const Guided = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [workoutCount, place, equipmentList, setWorkoutData, setWorkoutPlan, setError, navigate]);
+  }, [gender, experience, workoutCount, place, equipmentList, setWorkoutData, setWorkoutPlan, setError, navigate]);
 
   return (
     <LoadingOverlay isLoading={isLoading}>
@@ -89,16 +93,16 @@ export const Guided = () => {
                     as="h3"
                     size="sm"
                   >
-                    Сколько тренировок в неделю?
+                    Ваш пол
                   </Heading>
                   <RadioGroup.Root
-                    onValueChange={(e) => setWorkoutCount(e.value)}
+                    onValueChange={(e) => setGender(e.value)}
                   >
                     <HStack align="stretch">
-                      {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+                      {['Мужской', 'Женский'].map((item) => (
                         <RadioGroup.Item
                           key={item}
-                          value={String(item)}
+                          value={item}
                         >
                           <RadioGroup.ItemHiddenInput />
                           <RadioGroup.ItemIndicator />
@@ -110,6 +114,92 @@ export const Guided = () => {
                     </HStack>
                   </RadioGroup.Root>
                 </Stack>
+
+                {
+                  gender && (
+                    <Stack>
+                      <Heading
+                        as="h3"
+                        size="sm"
+                      >
+                        Ваш уровень подготовки
+                      </Heading>
+                      <RadioGroup.Root
+                        onValueChange={(e) => setExperience(e.value)}
+                      >
+                        <Stack gap={3}>
+                          <RadioGroup.Item value="Новичок">
+                            <RadioGroup.ItemHiddenInput />
+                            <RadioGroup.ItemIndicator />
+                            <RadioGroup.ItemText>
+                              <Box>
+                                <Text fontWeight="bold">Новичок</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  Тренируюсь меньше 6 месяцев или не тренируюсь совсем. Осваиваю базовые упражнения.
+                                </Text>
+                              </Box>
+                            </RadioGroup.ItemText>
+                          </RadioGroup.Item>
+                          <RadioGroup.Item value="Средний">
+                            <RadioGroup.ItemHiddenInput />
+                            <RadioGroup.ItemIndicator />
+                            <RadioGroup.ItemText>
+                              <Box>
+                                <Text fontWeight="bold">Средний</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  Тренируюсь от 6 месяцев до 2 лет. Знаю базовую технику, готов к умеренным нагрузкам.
+                                </Text>
+                              </Box>
+                            </RadioGroup.ItemText>
+                          </RadioGroup.Item>
+                          <RadioGroup.Item value="Продвинутый">
+                            <RadioGroup.ItemHiddenInput />
+                            <RadioGroup.ItemIndicator />
+                            <RadioGroup.ItemText>
+                              <Box>
+                                <Text fontWeight="bold">Продвинутый</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  Тренируюсь 2+ года. Владею техникой, хочу сложные комплексы и высокую интенсивность.
+                                </Text>
+                              </Box>
+                            </RadioGroup.ItemText>
+                          </RadioGroup.Item>
+                        </Stack>
+                      </RadioGroup.Root>
+                    </Stack>
+                  )
+                }
+
+                {
+                  gender && experience && (
+                    <Stack>
+                      <Heading
+                        as="h3"
+                        size="sm"
+                      >
+                        Сколько тренировок в неделю?
+                      </Heading>
+                      <RadioGroup.Root
+                        onValueChange={(e) => setWorkoutCount(e.value)}
+                      >
+                        <HStack align="stretch">
+                          {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+                            <RadioGroup.Item
+                              key={item}
+                              value={String(item)}
+                            >
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.ItemText>
+                                {item}
+                              </RadioGroup.ItemText>
+                            </RadioGroup.Item>
+                          ))}
+                        </HStack>
+                      </RadioGroup.Root>
+                    </Stack>
+                  )
+                }
                 {
                   workoutCount && (
                     <Stack>
@@ -120,7 +210,10 @@ export const Guided = () => {
                         Где вы планируете тренироваться?
                       </Heading>
                       <RadioGroup.Root
-                        onValueChange={(e) => setPlace(e.value)}
+                        onValueChange={(e) => {
+                          setPlace(e.value);
+                          setHasHomeEquipment(null);
+                        }}
                       >
                         <HStack align="stretch">
                           {['Дома', 'В зале', 'На улице'].map((item) => (
@@ -164,7 +257,7 @@ export const Guided = () => {
                       </RadioGroup.Root>
 
                       {
-                        hasHomeEquipment && (
+                        hasHomeEquipment === 'true' && (
                           <Accordion.Root
                             variant='enclosed'
                             collapsible
