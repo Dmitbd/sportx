@@ -68,7 +68,7 @@ export const handlers = [
 
   // Запрос к LLM
   http.post('/api/v1/chat/completions', async () => {
-    await delay(10000);
+    await delay(1000);
     return HttpResponse.json({
       choices: [
         {

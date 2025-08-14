@@ -10,9 +10,8 @@ import { promptService } from "@/services";
 import { askAI } from "@/services";
 import { BackButton } from "@/shared";
 
-const MuscleSelection = lazy(() => import("../components/MuscleSelection").then(module => ({ default: module.MuscleSelection })));
-
-// TODO: поправить семантику
+const MuscleSelection = lazy(() => import("../components/MuscleSelection")
+  .then(module => ({ default: module.MuscleSelection })));
 
 /**
  * @description Страница c формой сбора данных для создания плана тренировок
@@ -38,7 +37,9 @@ export const Guided = () => {
     );
   }, []);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     try {
       setIsLoading(true);
       setError(null);
@@ -73,6 +74,7 @@ export const Guided = () => {
   return (
     <LoadingOverlay isLoading={isLoading}>
       <Box
+        as="main"
         maxW="md"
         mx="auto"
         mt={10}
@@ -86,23 +88,25 @@ export const Guided = () => {
         <Card.Root>
           <CardBody>
             <Heading
-              as="h2"
-              size="md"
+              as="h1"
+              size="lg"
               mb={6}
             >
               Создание программы тренировок
             </Heading>
-            <form>
+            <form onSubmit={handleSubmit}>
               <Stack gap={6}>
-                <Stack>
+                <Box as="fieldset">
                   <Heading
-                    as="h3"
-                    size="sm"
+                    as="legend"
+                    size="md"
+                    mb={4}
                   >
                     Ваш пол
                   </Heading>
                   <RadioGroup.Root
                     onValueChange={(e) => setGender(e.value)}
+                    aria-describedby="gender-description"
                   >
                     <HStack align="stretch">
                       {genders.map((item) => (
@@ -119,19 +123,21 @@ export const Guided = () => {
                       ))}
                     </HStack>
                   </RadioGroup.Root>
-                </Stack>
+                </Box>
 
                 {
                   gender && (
-                    <Stack>
+                    <Box as="fieldset">
                       <Heading
-                        as="h3"
-                        size="sm"
+                        as="legend"
+                        size="md"
+                        mb={4}
                       >
                         Ваш уровень подготовки
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => setExperience(e.value)}
+                        aria-describedby="experience-description"
                       >
                         <Stack gap={3}>
                           <RadioGroup.Item value="Новичок">
@@ -140,7 +146,7 @@ export const Guided = () => {
                             <RadioGroup.ItemText>
                               <Box>
                                 <Text fontWeight="bold">Новичок</Text>
-                                <Text fontSize="sm" color="gray.600">
+                                <Text fontSize="sm" color="gray.600" id="novice-description">
                                   Тренируюсь меньше 6 месяцев или не тренируюсь совсем. Осваиваю базовые упражнения.
                                 </Text>
                               </Box>
@@ -152,7 +158,7 @@ export const Guided = () => {
                             <RadioGroup.ItemText>
                               <Box>
                                 <Text fontWeight="bold">Средний</Text>
-                                <Text fontSize="sm" color="gray.600">
+                                <Text fontSize="sm" color="gray.600" id="intermediate-description">
                                   Тренируюсь от 6 месяцев до 2 лет. Знаю базовую технику, готов к умеренным нагрузкам.
                                 </Text>
                               </Box>
@@ -164,7 +170,7 @@ export const Guided = () => {
                             <RadioGroup.ItemText>
                               <Box>
                                 <Text fontWeight="bold">Продвинутый</Text>
-                                <Text fontSize="sm" color="gray.600">
+                                <Text fontSize="sm" color="gray.600" id="advanced-description">
                                   Тренируюсь 2+ года. Владею техникой, хочу сложные комплексы и высокую интенсивность.
                                 </Text>
                               </Box>
@@ -172,22 +178,23 @@ export const Guided = () => {
                           </RadioGroup.Item>
                         </Stack>
                       </RadioGroup.Root>
-                    </Stack>
+                    </Box>
                   )
                 }
 
                 {
                   gender && experience && (
-                    <Box>
+                    <Box as="fieldset">
                       <Heading
-                        as="h3"
-                        size="sm"
-                        mb={2}
+                        as="legend"
+                        size="md"
+                        mb={4}
                       >
                         Сколько тренировок в неделю?
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => setWorkoutCount(e.value)}
+                        aria-describedby="workout-count-description"
                       >
                         <Wrap>
                           {trainingDays.map((item) => (
@@ -210,35 +217,36 @@ export const Guided = () => {
 
                 {
                   workoutCount && (
-                    <Stack>
+                    <Box as="fieldset">
                       <Heading
-                        as="h3"
-                        size="sm"
+                        as="legend"
+                        size="md"
+                        mb={4}
                       >
                         Какие мышцы хотите тренировать?
                       </Heading>
 
-                      {
-                        <RadioGroup.Root
-                          defaultValue={muscleSelectionType}
-                          onValueChange={(e) => setMuscleSelectionType(e.value)}
-                        >
-                          <Wrap>
-                            {[fullBodyOption, selectMusclesOption].map(option => (
-                              <RadioGroup.Item
-                                key={option}
-                                value={String(option)}
-                              >
-                                <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.ItemText>
-                                  {option}
-                                </RadioGroup.ItemText>
-                              </RadioGroup.Item>
-                            ))}
-                          </Wrap>
-                        </RadioGroup.Root>
-                      }
+                      <RadioGroup.Root
+                        defaultValue={muscleSelectionType}
+                        onValueChange={(e) => setMuscleSelectionType(e.value)}
+                        aria-describedby="muscle-selection-description"
+                        mb={6}
+                      >
+                        <Wrap>
+                          {[fullBodyOption, selectMusclesOption].map(option => (
+                            <RadioGroup.Item
+                              key={option}
+                              value={String(option)}
+                            >
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.ItemText>
+                                {option}
+                              </RadioGroup.ItemText>
+                            </RadioGroup.Item>
+                          ))}
+                        </Wrap>
+                      </RadioGroup.Root>
 
                       {
                         muscleSelectionType === selectMusclesOption && (
@@ -251,17 +259,17 @@ export const Guided = () => {
                           </Suspense>
                         )
                       }
-                    </Stack>
+                    </Box>
                   )
                 }
 
                 {
                   workoutCount && (
-                    <Box>
+                    <Box as="fieldset">
                       <Heading
-                        as="h3"
-                        size="sm"
-                        mb={2}
+                        as="legend"
+                        size="md"
+                        mb={4}
                       >
                         Где вы планируете тренироваться?
                       </Heading>
@@ -270,12 +278,14 @@ export const Guided = () => {
                           setPlace(e.value);
                           setHasHomeEquipment(null);
                         }}
+                        aria-describedby="place-description"
                       >
                         <Wrap>
                           {places.map((item) => (
                             <RadioGroup.Item
                               key={item}
                               value={item}
+                              disabled={item === 'На улице'}
                             >
                               <RadioGroup.ItemHiddenInput />
                               <RadioGroup.ItemIndicator />
@@ -290,14 +300,19 @@ export const Guided = () => {
 
                 {
                   workoutCount && place === 'Дома' && (
-                    <Stack>
+                    <Box as="fieldset">
                       <Heading
-                        as="h3"
-                        size="sm"
+                        as="legend"
+                        size="md"
+                        mb={4}
                       >
                         Есть ли у вас домашний инвентарь?
                       </Heading>
-                      <RadioGroup.Root onValueChange={(e) => setHasHomeEquipment(e.value)}>
+                      <RadioGroup.Root
+                        onValueChange={(e) => setHasHomeEquipment(e.value)}
+                        aria-describedby="equipment-description"
+                        mb={4}
+                      >
                         <HStack align="stretch">
                           <RadioGroup.Item value='true'>
                             <RadioGroup.ItemHiddenInput />
@@ -317,6 +332,7 @@ export const Guided = () => {
                           <Accordion.Root
                             variant='enclosed'
                             collapsible
+                            aria-describedby="equipment-list-description"
                           >
                             {equipmentList.map(item => (
                               <EquipmentCard
@@ -328,37 +344,41 @@ export const Guided = () => {
                           </Accordion.Root>
                         )
                       }
-                    </Stack>
+                    </Box>
                   )
                 }
 
                 {
                   workoutCount && place === 'В зале' && (
-                    <Text fontSize="sm" color="gray.600">
-                      Для этих тренировок будет учитываться инвентарь зала.
-                      При отсутствии инвентаря в зале, упражнения можно будет заменить на аналогичные.
-                    </Text>
+                    <Box role="note" aria-live="polite">
+                      <Text fontSize="sm" color="gray.600">
+                        Для этих тренировок будет учитываться инвентарь зала.
+                        При отсутствии инвентаря в зале, упражнения можно будет заменить на аналогичные.
+                      </Text>
+                    </Box>
                   )
                 }
 
                 {
                   workoutCount && place === 'На улице' && (
-                    <Stack>
+                    <Box as="fieldset">
                       <Heading
-                        as="h3"
-                        size="sm"
+                        as="legend"
+                        size="md"
+                        mb={4}
                       >
                         Какой есть инвентарь на улице?
                       </Heading>
-                    </Stack>
+                    </Box>
                   )
                 }
               </Stack>
               <Button
+                type="submit"
                 colorScheme="blue"
-                mt={4}
-                onClick={handleSubmit}
+                mt={6}
                 loading={isLoading}
+                aria-describedby="submit-description"
               >
                 Продолжить
               </Button>
