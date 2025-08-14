@@ -1,0 +1,1 @@
+export { MuscleSelection } from './MuscleSelection';

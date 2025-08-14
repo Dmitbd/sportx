@@ -1,14 +1,18 @@
-import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text } from "@chakra-ui/react";
-import { useCallback, useState } from "react";
+import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text, Wrap } from "@chakra-ui/react";
+import { useCallback, useState, lazy, Suspense } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
 import type { EquipmentItem } from "../types";
-import { initialItems } from "../constants";
+import { fullBodyOption, genders, initialItems, places, selectMusclesOption, trainingDays } from "../constants";
 import { useWorkoutStore } from "@/stores/workoutStore";
 import { LoadingOverlay } from "@/components";
 import { promptService } from "@/services";
 import { askAI } from "@/services";
 import { BackButton } from "@/shared";
+
+const MuscleSelection = lazy(() => import("../components/MuscleSelection").then(module => ({ default: module.MuscleSelection })));
+
+// TODO: поправить семантику
 
 /**
  * @description Страница c формой сбора данных для создания плана тренировок
@@ -19,18 +23,20 @@ export const Guided = () => {
   const [gender, setGender] = useState<string | null>(null);
   const [experience, setExperience] = useState<string | null>(null);
   const [workoutCount, setWorkoutCount] = useState<string | null>(null);
+
   const [place, setPlace] = useState<string | null>(null);
   const [hasHomeEquipment, setHasHomeEquipment] = useState<string | null>(null);
   const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialItems);
+  const [muscleSelectionType, setMuscleSelectionType] = useState<string | null>(fullBodyOption);
 
   const navigate = useNavigate();
   const { setWorkoutData, setWorkoutPlan, setError } = useWorkoutStore();
 
-  const handleItemUpdate = (updatedItem: EquipmentItem) => {
+  const handleItemUpdate = useCallback((updatedItem: EquipmentItem) => {
     setEquipmentList(prev =>
       prev.map(item => item.name === updatedItem.name ? updatedItem : item)
     );
-  };
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -99,7 +105,7 @@ export const Guided = () => {
                     onValueChange={(e) => setGender(e.value)}
                   >
                     <HStack align="stretch">
-                      {['Мужской', 'Женский'].map((item) => (
+                      {genders.map((item) => (
                         <RadioGroup.Item
                           key={item}
                           value={item}
@@ -172,18 +178,19 @@ export const Guided = () => {
 
                 {
                   gender && experience && (
-                    <Stack>
+                    <Box>
                       <Heading
                         as="h3"
                         size="sm"
+                        mb={2}
                       >
                         Сколько тренировок в неделю?
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => setWorkoutCount(e.value)}
                       >
-                        <HStack align="stretch">
-                          {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+                        <Wrap>
+                          {trainingDays.map((item) => (
                             <RadioGroup.Item
                               key={item}
                               value={String(item)}
@@ -195,17 +202,66 @@ export const Guided = () => {
                               </RadioGroup.ItemText>
                             </RadioGroup.Item>
                           ))}
-                        </HStack>
+                        </Wrap>
                       </RadioGroup.Root>
-                    </Stack>
+                    </Box>
                   )
                 }
+
                 {
                   workoutCount && (
                     <Stack>
                       <Heading
                         as="h3"
                         size="sm"
+                      >
+                        Какие мышцы хотите тренировать?
+                      </Heading>
+
+                      {
+                        <RadioGroup.Root
+                          defaultValue={muscleSelectionType}
+                          onValueChange={(e) => setMuscleSelectionType(e.value)}
+                        >
+                          <Wrap>
+                            {[fullBodyOption, selectMusclesOption].map(option => (
+                              <RadioGroup.Item
+                                key={option}
+                                value={String(option)}
+                              >
+                                <RadioGroup.ItemHiddenInput />
+                                <RadioGroup.ItemIndicator />
+                                <RadioGroup.ItemText>
+                                  {option}
+                                </RadioGroup.ItemText>
+                              </RadioGroup.Item>
+                            ))}
+                          </Wrap>
+                        </RadioGroup.Root>
+                      }
+
+                      {
+                        muscleSelectionType === selectMusclesOption && (
+                          <Suspense fallback={
+                            <Box p={4} textAlign="center">
+                              <Text color="gray.500">Загрузка...</Text>
+                            </Box>
+                          }>
+                            <MuscleSelection />
+                          </Suspense>
+                        )
+                      }
+                    </Stack>
+                  )
+                }
+
+                {
+                  workoutCount && (
+                    <Box>
+                      <Heading
+                        as="h3"
+                        size="sm"
+                        mb={2}
                       >
                         Где вы планируете тренироваться?
                       </Heading>
@@ -215,8 +271,8 @@ export const Guided = () => {
                           setHasHomeEquipment(null);
                         }}
                       >
-                        <HStack align="stretch">
-                          {['Дома', 'В зале', 'На улице'].map((item) => (
+                        <Wrap>
+                          {places.map((item) => (
                             <RadioGroup.Item
                               key={item}
                               value={item}
@@ -226,9 +282,9 @@ export const Guided = () => {
                               <RadioGroup.ItemText>{item}</RadioGroup.ItemText>
                             </RadioGroup.Item>
                           ))}
-                        </HStack>
+                        </Wrap>
                       </RadioGroup.Root>
-                    </Stack>
+                    </Box>
                   )
                 }
 
@@ -278,15 +334,10 @@ export const Guided = () => {
 
                 {
                   workoutCount && place === 'В зале' && (
-                    <Stack>
-                      <Heading
-                        as="h3"
-                        size="sm"
-                      >
-                        {/* TODO определиться с логикой зала */}
-                        Что-то про улицу
-                      </Heading>
-                    </Stack>
+                    <Text fontSize="sm" color="gray.600">
+                      Для этих тренировок будет учитываться инвентарь зала.
+                      При отсутствии инвентаря в зале, упражнения можно будет заменить на аналогичные.
+                    </Text>
                   )
                 }
 
