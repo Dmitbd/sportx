@@ -1,5 +1,6 @@
 import type { AIMessage, AIWorkoutResponse } from '@/types';
 import axios from 'axios';
+import { ERRORS } from '@/locales';
 
 // TODO избавиться от не нужных обработок ошибки, пока надо все упростить
 // TODO подумать над обработкой ошибок в запросе
@@ -8,7 +9,7 @@ export const askAI = async (messages: AIMessage[]): Promise<AIWorkoutResponse> =
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY_SECOND;
 
   if (!apiKey) {
-    throw new Error('OpenRouter API key is missing');
+    throw new Error(ERRORS.AI.MISSING_API_KEY);
   }
 
   // проксируем на наши моки
@@ -37,7 +38,7 @@ export const askAI = async (messages: AIMessage[]): Promise<AIWorkoutResponse> =
     const content = response.data.choices[0]?.message?.content;
 
     if (!content) {
-      throw new Error('ИИ не вернул содержимое ответа');
+      throw new Error(ERRORS.AI.NO_CONTENT);
     }
 
     return JSON.parse(content);
@@ -48,19 +49,19 @@ export const askAI = async (messages: AIMessage[]): Promise<AIWorkoutResponse> =
       console.error('Response data:', error.response?.data);
 
       if (error.response?.status === 429) {
-        throw new Error('Превышен лимит запросов. Попробуйте позже.');
+        throw new Error(ERRORS.COMMON.RATE_LIMIT);
       }
       if (error.response?.status === 401) {
-        throw new Error('Неверный API ключ');
+        throw new Error(ERRORS.AI.INVALID_API_KEY);
       }
 
-      throw new Error(`Ошибка сервера: ${error.response?.status}`);
+      throw new Error(ERRORS.COMMON.SERVER_ERROR);
     }
 
     if (error instanceof Error) {
-      throw new Error(`Ошибка при обращении к ИИ-сервису: ${error.message}`);
+      throw new Error(ERRORS.AI.AI_SERVICE_ERROR(error.message));
     }
 
-    throw new Error('Неизвестная ошибка при обращении к ИИ-сервису');
+    throw new Error(ERRORS.COMMON.UNKNOWN_ERROR);
   }
 };

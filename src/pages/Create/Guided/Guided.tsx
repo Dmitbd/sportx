@@ -3,12 +3,15 @@ import { useCallback, useState, lazy, Suspense } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
 import type { EquipmentItem } from "../types";
-import { fullBodyOption, genders, initialItems, places, selectMusclesOption, trainingDays } from "../constants";
+import {
+  INITIAL_ITEMS
+} from "../constants";
 import { useWorkoutStore } from "@/stores/workoutStore";
 import { LoadingOverlay } from "@/components";
-import { promptService } from "@/services";
+import { workoutCreate } from "@/services";
 import { askAI } from "@/services";
 import { BackButton } from "@/shared";
+import { RU, ERRORS } from "@/locales";
 
 const MuscleSelection = lazy(() => import("../components/MuscleSelection")
   .then(module => ({ default: module.MuscleSelection })));
@@ -25,8 +28,8 @@ export const Guided = () => {
 
   const [place, setPlace] = useState<string | null>(null);
   const [hasHomeEquipment, setHasHomeEquipment] = useState<string | null>(null);
-  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(initialItems);
-  const [muscleSelectionType, setMuscleSelectionType] = useState<string | null>(fullBodyOption);
+  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(INITIAL_ITEMS);
+  const [muscleSelectionType, setMuscleSelectionType] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { setWorkoutData, setWorkoutPlan, setError } = useWorkoutStore();
@@ -52,7 +55,7 @@ export const Guided = () => {
         equipment: equipmentList
       });
 
-      const prompt = promptService.generateWorkoutPrompt(
+      const prompt = workoutCreate.generateWorkoutPrompt(
         workoutCount!,
         place!,
         equipmentList
@@ -64,7 +67,7 @@ export const Guided = () => {
 
       navigate('/workouts/create/confirm');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -82,7 +85,7 @@ export const Guided = () => {
       >
         <BackButton
           variant="plain"
-          ariaLabel="Назад к тренировкам"
+          ariaLabel={RU.ACTIONS.BACK}
         />
 
         <Card.Root>
@@ -92,7 +95,7 @@ export const Guided = () => {
               size="lg"
               mb={6}
             >
-              Создание программы тренировок
+              {RU.CREATE.TITLES.GUIDED}
             </Heading>
             <form onSubmit={handleSubmit}>
               <Stack gap={6}>
@@ -102,14 +105,13 @@ export const Guided = () => {
                     size="md"
                     mb={4}
                   >
-                    Ваш пол
+                    {RU.CREATE.SECTIONS.GENDER}
                   </Heading>
                   <RadioGroup.Root
                     onValueChange={(e) => setGender(e.value)}
-                    aria-describedby="gender-description"
                   >
                     <HStack align="stretch">
-                      {genders.map((item) => (
+                      {RU.CREATE.OPTIONS.GENDERS.map((item) => (
                         <RadioGroup.Item
                           key={item}
                           value={item}
@@ -133,45 +135,44 @@ export const Guided = () => {
                         size="md"
                         mb={4}
                       >
-                        Ваш уровень подготовки
+                        {RU.CREATE.SECTIONS.EXPERIENCE}
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => setExperience(e.value)}
-                        aria-describedby="experience-description"
                       >
                         <Stack gap={3}>
-                          <RadioGroup.Item value="Новичок">
+                          <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}>
                             <RadioGroup.ItemHiddenInput />
                             <RadioGroup.ItemIndicator />
                             <RadioGroup.ItemText>
                               <Box>
-                                <Text fontWeight="bold">Новичок</Text>
-                                <Text fontSize="sm" color="gray.600" id="novice-description">
-                                  Тренируюсь меньше 6 месяцев или не тренируюсь совсем. Осваиваю базовые упражнения.
+                                <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {RU.CREATE.EXPERIENCE_LEVELS.NOVICE.DESCRIPTION}
                                 </Text>
                               </Box>
                             </RadioGroup.ItemText>
                           </RadioGroup.Item>
-                          <RadioGroup.Item value="Средний">
+                          <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.TITLE}>
                             <RadioGroup.ItemHiddenInput />
                             <RadioGroup.ItemIndicator />
                             <RadioGroup.ItemText>
                               <Box>
-                                <Text fontWeight="bold">Средний</Text>
-                                <Text fontSize="sm" color="gray.600" id="intermediate-description">
-                                  Тренируюсь от 6 месяцев до 2 лет. Знаю базовую технику, готов к умеренным нагрузкам.
+                                <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.TITLE}</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.DESCRIPTION}
                                 </Text>
                               </Box>
                             </RadioGroup.ItemText>
                           </RadioGroup.Item>
-                          <RadioGroup.Item value="Продвинутый">
+                          <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.TITLE}>
                             <RadioGroup.ItemHiddenInput />
                             <RadioGroup.ItemIndicator />
                             <RadioGroup.ItemText>
                               <Box>
-                                <Text fontWeight="bold">Продвинутый</Text>
-                                <Text fontSize="sm" color="gray.600" id="advanced-description">
-                                  Тренируюсь 2+ года. Владею техникой, хочу сложные комплексы и высокую интенсивность.
+                                <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.TITLE}</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.DESCRIPTION}
                                 </Text>
                               </Box>
                             </RadioGroup.ItemText>
@@ -190,14 +191,13 @@ export const Guided = () => {
                         size="md"
                         mb={4}
                       >
-                        Сколько тренировок в неделю?
+                        {RU.CREATE.SECTIONS.WORKOUT_COUNT}
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => setWorkoutCount(e.value)}
-                        aria-describedby="workout-count-description"
                       >
                         <Wrap>
-                          {trainingDays.map((item) => (
+                          {RU.CREATE.OPTIONS.TRAINING_DAYS.map((item) => (
                             <RadioGroup.Item
                               key={item}
                               value={String(item)}
@@ -223,17 +223,15 @@ export const Guided = () => {
                         size="md"
                         mb={4}
                       >
-                        Какие мышцы хотите тренировать?
+                        {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
                       </Heading>
 
                       <RadioGroup.Root
-                        defaultValue={muscleSelectionType}
                         onValueChange={(e) => setMuscleSelectionType(e.value)}
-                        aria-describedby="muscle-selection-description"
                         mb={6}
                       >
                         <Wrap>
-                          {[fullBodyOption, selectMusclesOption].map(option => (
+                          {[RU.CREATE.OPTIONS.SELECTION.FULL_BODY, RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES].map(option => (
                             <RadioGroup.Item
                               key={option}
                               value={String(option)}
@@ -249,10 +247,10 @@ export const Guided = () => {
                       </RadioGroup.Root>
 
                       {
-                        muscleSelectionType === selectMusclesOption && (
+                        muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
                           <Suspense fallback={
                             <Box p={4} textAlign="center">
-                              <Text color="gray.500">Загрузка...</Text>
+                              <Text color="gray.500">{RU.CREATE.SECTIONS.MUSCLE_SELECTION}</Text>
                             </Box>
                           }>
                             <MuscleSelection />
@@ -271,17 +269,16 @@ export const Guided = () => {
                         size="md"
                         mb={4}
                       >
-                        Где вы планируете тренироваться?
+                        {RU.CREATE.SECTIONS.PLACE}
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => {
                           setPlace(e.value);
                           setHasHomeEquipment(null);
                         }}
-                        aria-describedby="place-description"
                       >
                         <Wrap>
-                          {places.map((item) => (
+                          {RU.CREATE.OPTIONS.PLACES.map((item) => (
                             <RadioGroup.Item
                               key={item}
                               value={item}
@@ -306,25 +303,28 @@ export const Guided = () => {
                         size="md"
                         mb={4}
                       >
-                        Есть ли у вас домашний инвентарь?
+                        {RU.CREATE.SECTIONS.HOME_EQUIPMENT}
                       </Heading>
                       <RadioGroup.Root
                         onValueChange={(e) => setHasHomeEquipment(e.value)}
-                        aria-describedby="equipment-description"
                         mb={4}
                       >
-                        <HStack align="stretch">
-                          <RadioGroup.Item value='true'>
-                            <RadioGroup.ItemHiddenInput />
-                            <RadioGroup.ItemIndicator />
-                            <RadioGroup.ItemText>{'Да'}</RadioGroup.ItemText>
-                          </RadioGroup.Item>
-                          <RadioGroup.Item value='false'>
-                            <RadioGroup.ItemHiddenInput />
-                            <RadioGroup.ItemIndicator />
-                            <RadioGroup.ItemText>{'Нет'}</RadioGroup.ItemText>
-                          </RadioGroup.Item>
-                        </HStack>
+                        <Wrap>
+                          {
+                            RU.CREATE.OPTIONS.ACCEPT.map(item => (
+                              <RadioGroup.Item
+                                key={item}
+                                value={String(item)}
+                              >
+                                <RadioGroup.ItemHiddenInput />
+                                <RadioGroup.ItemIndicator />
+                                <RadioGroup.ItemText>
+                                  {item}
+                                </RadioGroup.ItemText>
+                              </RadioGroup.Item>
+                            ))
+                          }
+                        </Wrap>
                       </RadioGroup.Root>
 
                       {
@@ -332,7 +332,6 @@ export const Guided = () => {
                           <Accordion.Root
                             variant='enclosed'
                             collapsible
-                            aria-describedby="equipment-list-description"
                           >
                             {equipmentList.map(item => (
                               <EquipmentCard
@@ -352,8 +351,7 @@ export const Guided = () => {
                   workoutCount && place === 'В зале' && (
                     <Box role="note" aria-live="polite">
                       <Text fontSize="sm" color="gray.600">
-                        Для этих тренировок будет учитываться инвентарь зала.
-                        При отсутствии инвентаря в зале, упражнения можно будет заменить на аналогичные.
+                        {RU.CREATE.MESSAGES.GYM_EQUIPMENT}
                       </Text>
                     </Box>
                   )
@@ -367,7 +365,7 @@ export const Guided = () => {
                         size="md"
                         mb={4}
                       >
-                        Какой есть инвентарь на улице?
+                        {RU.CREATE.SECTIONS.OUTDOOR_EQUIPMENT}
                       </Heading>
                     </Box>
                   )
@@ -378,9 +376,8 @@ export const Guided = () => {
                 colorScheme="blue"
                 mt={6}
                 loading={isLoading}
-                aria-describedby="submit-description"
               >
-                Продолжить
+                {RU.ACTIONS.CONTINUE}
               </Button>
             </form>
           </CardBody>

@@ -1,2 +1,1 @@
-export { WorkoutsList } from './WorkoutsList';
 export { WorkoutDetails } from './WorkoutDetails';

@@ -2,7 +2,7 @@ import type { EquipmentItem } from '@/pages/Create/types';
 
 //TODO: добавить в промт muscles: string[]
 
-export const promptService = {
+export const workoutCreate = {
   generateWorkoutPrompt: (workoutCount: string, place: string, equipment: EquipmentItem[]): string => {
     const equipmentDescription = equipment.map(item => {
       const unitsDescription = item.units.length > 0

@@ -5,18 +5,18 @@ interface EquipmentItem {
   units: EquipmentUnit[];
 }
 
-type MusclePart = string;
-
-type MuscleSubGroup = {
-  [muscleName: string]: MusclePart[];
+type MuscleSubGroups = {
+  name: string;
+  parts: string[];
 }
 
-type MuscleGroup = {
-  [groupName: string]: MuscleSubGroup;
+type MuscleGroups = {
+  name: string;
+  groups: MuscleSubGroups[];
 }
 
 export type {
   EquipmentUnit,
   EquipmentItem,
-  MuscleGroup
+  MuscleGroups
 };

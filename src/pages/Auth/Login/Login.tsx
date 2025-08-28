@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Alert, Box, Button, Input, Stack } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
+import { RU, ERRORS } from '@/locales';
 
 export const Login = () => {
   const { setUser } = useAuthStore();
@@ -31,7 +32,7 @@ export const Login = () => {
       const user = await authService.login(formData);
       setUser(user);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -43,7 +44,9 @@ export const Login = () => {
       <Box p={6}>
         <Alert.Root status="error" mb={4}>
           <Alert.Indicator />
-          <Alert.Title>Ошибка загрузки тренировок</Alert.Title>
+          <Alert.Title>
+            {ERRORS.COMMON.ERROR}
+          </Alert.Title>
           <Alert.Description>{error}</Alert.Description>
         </Alert.Root>
         <Button
@@ -51,7 +54,7 @@ export const Login = () => {
           // TODO: передавать метод загрузки, а не reload
           onClick={() => window.location.reload()}
         >
-          Попробовать снова
+          {RU.ACTIONS.RETRY}
         </Button>
       </Box>
     );
@@ -62,14 +65,14 @@ export const Login = () => {
       <Stack gap="4">
         <Input
           name="email"
-          placeholder="login"
+          placeholder={RU.AUTH.LABELS.EMAIL}
           variant="outline"
           value={formData.email}
           onChange={handleFormChange}
         />
         <Input
           name="password"
-          placeholder="password"
+          placeholder={RU.AUTH.LABELS.PASSWORD}
           variant="outline"
           value={formData.password}
           onChange={handleFormChange}
@@ -78,13 +81,15 @@ export const Login = () => {
           loading={isLoading}
           onClick={onSubmitForm}
         >
-          login
+          {RU.ACTIONS.LOGIN}
         </Button>
         <Button
           loading={isLoading}
           asChild
         >
-          <Link to={'/auth/register'}>register</Link>
+          <Link to={'/auth/register'}>
+            {RU.ACTIONS.REGISTER}
+          </Link>
         </Button>
       </Stack>
     </LoadingOverlay>

@@ -1,2 +1,1 @@
-export { Guided } from './Guided';
 export { Confirm } from './Confirm';

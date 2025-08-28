@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, MainLayout } from "@/layouts";
-import { Confirm, Guided, Login, NotFound, Register, Workouts } from "@/pages";
-import { WorkoutDetails } from "@/pages/Workouts/WorkoutDetails/WorkoutDetails";
+import { Confirm, Guided, Login, NotFound, Register, WorkoutsList, WorkoutDetails } from "@/pages";
 import { ProtectedRoute, PublicRoute } from "./components";
 
 export const router = createBrowserRouter([
@@ -20,7 +19,7 @@ export const router = createBrowserRouter([
             index: true,
             element: (
               <ProtectedRoute>
-                <Workouts />
+                <WorkoutsList />
               </ProtectedRoute>
             )
           },

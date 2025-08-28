@@ -7,6 +7,7 @@ import type { Training, UpdateWorkoutSets } from '@/types';
 import { filter, isDeepEqual, isNullish, map, pipe } from 'remeda';
 import { BackButton } from '@/shared';
 import { LoadingOverlay } from '@/components';
+import { ERRORS, RU } from '@/locales';
 
 /**
  * TODO:
@@ -103,7 +104,7 @@ export const WorkoutDetails = () => {
 
       // Если нет изменений, выходим
       if (changedExercises.length === 0) {
-        setSaveSuccess('Нет изменений для сохранения');
+        setSaveSuccess(ERRORS.COMMON.NO_CHANGES);
         return;
       }
 
@@ -149,9 +150,9 @@ export const WorkoutDetails = () => {
         });
       }
 
-      setSaveSuccess('Изменения сохранены');
+      setSaveSuccess(ERRORS.COMMON.CHANGES_SAVED);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ошибка сохранения';
+      const message = error instanceof Error ? error.message : ERRORS.WORKOUTS.SAVE_ERROR;
       setError(message);
     } finally {
       setIsSaving(false);
@@ -182,7 +183,7 @@ export const WorkoutDetails = () => {
 
       navigate('/workouts');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ошибка удаления';
+      const message = error instanceof Error ? error.message : ERRORS.WORKOUTS.DELETE_ERROR;
       setError(message);
     } finally {
       setIsDeleting(false);
@@ -211,7 +212,7 @@ export const WorkoutDetails = () => {
         setInitialTraining(data);
         setTraining(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+        const errorMessage = err instanceof Error ? err.message : ERRORS.WORKOUTS.LOAD_ERROR;
         setError(errorMessage);
       } finally {
         setIsLoading(false);
@@ -238,11 +239,11 @@ export const WorkoutDetails = () => {
       </Alert.Root>
     );
   }
-  
+
   if (!training) {
     return (
       <Alert.Root status="error">
-        Тренировка не найдена
+        {ERRORS.WORKOUTS.NOT_FOUND}
       </Alert.Root>
     );
   }
@@ -252,7 +253,7 @@ export const WorkoutDetails = () => {
       <Box p={6}>
         <BackButton
           variant="plain"
-          ariaLabel="Назад к тренировкам"
+          ariaLabel={RU.ACTIONS.BACK}
         />
 
         <HStack justify="space-between" align="center" mb={4}>
@@ -264,7 +265,7 @@ export const WorkoutDetails = () => {
           </Heading>
 
           <IconButton
-            aria-label="Удалить тренировку"
+            aria-label={RU.ACTIONS.DELETE}
             variant="ghost"
             colorScheme="red"
             size="sm"
@@ -296,7 +297,7 @@ export const WorkoutDetails = () => {
 
                   <Box mt="4">
                     <Heading as="h4" size="sm" mb={2}>
-                      Подходы
+                      {RU.WORKOUTS.PLURALIZATION.SETS_COUNT}
                     </Heading>
                     <Stack gap={2}>
                       {exercise.sets.map((set, setIndex) => (
@@ -306,12 +307,12 @@ export const WorkoutDetails = () => {
                           align="center"
                         >
                           <Text minW="80px">
-                            Подход {setIndex + 1}
+                            {RU.WORKOUTS.PLURALIZATION.SETS_COUNT} {setIndex + 1}
                           </Text>
                           <HStack gap={6} align="center">
                             <HStack gap={2} align="center">
                               <Text color="gray.600">
-                                Вес:
+                                {RU.WORKOUTS.LABELS.WEIGHT}
                               </Text>
                               <Editable.Root
                                 key={`${exercise.name}-${setIndex}-weight-${forceUpdate}`}
@@ -331,7 +332,7 @@ export const WorkoutDetails = () => {
                             </HStack>
                             <HStack gap={2} align="center">
                               <Text color="gray.600">
-                                Повторения:
+                                {RU.WORKOUTS.PLURALIZATION.REPS_COUNT}:
                               </Text>
                               <Editable.Root
                                 key={`${exercise.name}-${setIndex}-reps-${forceUpdate}`}
@@ -359,7 +360,7 @@ export const WorkoutDetails = () => {
                 <Card.Footer>
                   <Collapsible.Root>
                     <Collapsible.Trigger paddingY="3">
-                      Описание
+                      {RU.WORKOUTS.LABELS.TECHNIQUE}
                     </Collapsible.Trigger>
                     <Collapsible.Content>
                       <Box padding="4" borderWidth="1px">
@@ -381,10 +382,10 @@ export const WorkoutDetails = () => {
                 <ActionBar.Separator />
                 <HStack gap={2}>
                   <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
-                    Отменить
+                    {RU.ACTIONS.CANCEL}
                   </Button>
                   <Button colorScheme="blue" size="sm" onClick={handleSave} disabled={isSaving} loading={isSaving}>
-                    Сохранить
+                    {RU.ACTIONS.SAVE}
                   </Button>
                 </HStack>
                 {saveSuccess && (
@@ -403,10 +404,10 @@ export const WorkoutDetails = () => {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>Удалить тренировку</Dialog.Title>
+                <Dialog.Title>{RU.ACTIONS.DELETE}</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                <Text>Вы уверены, что хотите удалить "{training.name}"?</Text>
+                <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM(training.name)}</Text>
                 <Text>Это действие нельзя отменить.</Text>
               </Dialog.Body>
               <Dialog.Footer>
@@ -416,14 +417,14 @@ export const WorkoutDetails = () => {
                     onClick={() => setIsDeleteDialogOpen(false)}
                     disabled={isDeleting}
                   >
-                    Отмена
+                    {RU.ACTIONS.CANCEL}
                   </Button>
                   <Button
                     onClick={handleDelete}
                     disabled={isDeleting}
                     loading={isDeleting}
                   >
-                    Удалить
+                    {RU.ACTIONS.DELETE}
                   </Button>
                 </HStack>
               </Dialog.Footer>

@@ -1,2 +1,2 @@
-export { EquipmentCard } from './EquipmentCard/EquipmentCard';
+export { EquipmentCard } from './EquipmentCard';
 export { MuscleSelection } from './MuscleSelection';

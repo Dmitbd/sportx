@@ -1,8 +1,8 @@
 import { Stack } from "@chakra-ui/react";
 import { memo, useCallback, useState } from "react";
-import { entries } from "remeda";
-import { muscleGroups, fullBodyOption } from "../../constants";
+import { MUSCLE_SELECTOR } from "../../constants";
 import { CustomCheckbox, CustomAccordion } from "@/shared";
+import { RU } from "@/locales";
 
 /**
  * @description Компонент для выбора групп мышц, подгрупп и конкретных мышц для тренировки.
@@ -13,8 +13,6 @@ import { CustomCheckbox, CustomAccordion } from "@/shared";
  * @returns Компонент с интерфейсом выбора мышц
  */
 export const MuscleSelection = memo(() => {
-  const muscleGroupsEntries = entries(muscleGroups);
-
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedSubgroups, setSelectedSubgroups] = useState<string[]>([]);
   const [selectedMuscles, setSelectedMuscles] = useState<string[]>([]);
@@ -45,56 +43,66 @@ export const MuscleSelection = memo(() => {
   const handleGroupSelection = useCallback((groupKey: string) => (checked: boolean) => {
     if (checked) {
       // Если выбираем "Все тело", очищаем все остальные выборы
-      if (groupKey === fullBodyOption) {
-        setSelectedGroups([fullBodyOption]);
+      if (groupKey === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
+        setSelectedGroups([RU.CREATE.OPTIONS.SELECTION.FULL_BODY]);
         setSelectedSubgroups([]);
         setSelectedMuscles([]);
         return;
       }
 
       // Если выбираем любую другую группу, снимаем "Все тело"
-      const muscleSubgroup = muscleGroups[groupKey];
-      const allSubgroups = Object.keys(muscleSubgroup);
-      const allMuscles = Object.values(muscleSubgroup).flat();
+      const muscleGroup = MUSCLE_SELECTOR.find(group => group.name === groupKey);
 
-      setSelectedGroups(prev => [...prev.filter(g => g !== fullBodyOption), groupKey]);
-      setSelectedSubgroups(prev => [...prev, ...allSubgroups]);
-      setSelectedMuscles(prev => [...prev, ...allMuscles]);
+      if (muscleGroup) {
+        const allSubgroups = muscleGroup.groups.map(group => group.name);
+        const allMuscles = muscleGroup.groups.flatMap(group => group.parts);
+
+        setSelectedGroups(prev => [...prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY), groupKey]);
+        setSelectedSubgroups(prev => [...prev, ...allSubgroups]);
+        setSelectedMuscles(prev => [...prev, ...allMuscles]);
+      }
     } else {
       // Если снимаем "Все тело", просто убираем его
-      if (groupKey === fullBodyOption) {
-        setSelectedGroups(prev => prev.filter(g => g !== fullBodyOption));
+      if (groupKey === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
+        setSelectedGroups(prev => prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY));
         return;
       }
 
       // Если снимаем другую группу, убираем её и все связанные элементы
-      const muscleSubgroup = muscleGroups[groupKey];
-      const allSubgroups = Object.keys(muscleSubgroup);
-      const allMuscles = Object.values(muscleSubgroup).flat();
+      const muscleGroup = MUSCLE_SELECTOR.find(group => group.name === groupKey);
 
-      setSelectedGroups(prev => prev.filter(g => g !== groupKey));
-      setSelectedSubgroups(prev => prev.filter(s => !allSubgroups.includes(s)));
-      setSelectedMuscles(prev => prev.filter(m => !allMuscles.includes(m)));
+      if (muscleGroup) {
+        const allSubgroups = muscleGroup.groups.map(group => group.name);
+        const allMuscles = muscleGroup.groups.flatMap(group => group.parts);
+
+        setSelectedGroups(prev => prev.filter(g => g !== groupKey));
+        setSelectedSubgroups(prev => prev.filter(s => !allSubgroups.includes(s)));
+        setSelectedMuscles(prev => prev.filter(m => !allMuscles.includes(m)));
+      }
     }
   }, []);
 
   const handleSubgroupSelection = useCallback((subgroupKey: string, groupKey: string) => (checked: boolean) => {
     // При выборе подгруппы снимаем "Все тело"
     if (checked) {
-      const muscles = muscleGroups[groupKey][subgroupKey];
+      const muscleGroup = MUSCLE_SELECTOR.find(group => group.name === groupKey);
+      const subgroup = muscleGroup?.groups.find(group => group.name === subgroupKey);
+      const muscles = subgroup?.parts ?? [];
 
-      setSelectedGroups(prev => [...prev.filter(g => g !== fullBodyOption), groupKey]);
+      setSelectedGroups(prev => [...prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY), groupKey]);
       setSelectedSubgroups(prev => [...prev, subgroupKey]);
       setSelectedMuscles(prev => [...prev, ...muscles]);
     } else {
-      const muscles = muscleGroups[groupKey][subgroupKey];
+      const muscleGroup = MUSCLE_SELECTOR.find(group => group.name === groupKey);
+      const subgroup = muscleGroup?.groups.find(group => group.name === subgroupKey);
+      const muscles = subgroup?.parts ?? [];
 
       setSelectedSubgroups(prev => {
         const newSubgroups = prev.filter(s => s !== subgroupKey);
 
         // Проверяем, нужно ли снять родительскую группу
-        const shouldRemoveGroup = !Object.keys(muscleGroups[groupKey]).some(subKey =>
-          newSubgroups.includes(subKey)
+        const shouldRemoveGroup = !muscleGroup?.groups.some(group =>
+          newSubgroups.includes(group.name)
         );
 
         if (shouldRemoveGroup) {
@@ -110,15 +118,19 @@ export const MuscleSelection = memo(() => {
   const handleMuscleSelection = useCallback((muscle: string, groupKey: string, subgroupKey: string) => (checked: boolean) => {
     // При выборе отдельной мышцы снимаем "Все тело"
     if (checked) {
-      setSelectedGroups(prev => [...prev.filter(g => g !== fullBodyOption), groupKey]);
+      setSelectedGroups(prev => [...prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY), groupKey]);
       setSelectedSubgroups(prev => [...prev, subgroupKey]);
       setSelectedMuscles(prev => [...prev, muscle]);
     } else {
       setSelectedMuscles(prev => {
         const newMuscles = prev.filter(m => m !== muscle);
 
+        const muscleGroup = MUSCLE_SELECTOR.find(group => group.name === groupKey);
+        const subgroup = muscleGroup?.groups.find(group => group.name === subgroupKey);
+        const subgroupMuscles = subgroup?.parts ?? [];
+
         // Проверяем, нужно ли снять родительскую подгруппу
-        const shouldRemoveSubgroup = !muscleGroups[groupKey][subgroupKey].some(m =>
+        const shouldRemoveSubgroup = !subgroupMuscles.some(m =>
           newMuscles.includes(m)
         );
 
@@ -127,8 +139,8 @@ export const MuscleSelection = memo(() => {
         }
 
         // Проверяем, нужно ли снять родительскую группу
-        const shouldRemoveGroup = !Object.keys(muscleGroups[groupKey]).some(subKey =>
-          shouldRemoveSubgroup ? true : selectedSubgroups.includes(subKey)
+        const shouldRemoveGroup = !muscleGroup?.groups.some(group =>
+          shouldRemoveSubgroup ? true : selectedSubgroups.includes(group.name)
         );
 
         if (shouldRemoveGroup) {
@@ -142,41 +154,41 @@ export const MuscleSelection = memo(() => {
 
   return (
     <Stack gap={2}>
-      {muscleGroupsEntries.map(([groupKey, muscleSubgroup]) => (
+      {MUSCLE_SELECTOR.map((muscleGroup) => (
         <CustomAccordion
-          key={groupKey}
+          key={muscleGroup.name}
           title={
             <CustomCheckbox
-              checked={selectedGroups.includes(groupKey)}
-              onChange={handleGroupSelection(groupKey)}
-              label={groupKey}
+              checked={selectedGroups.includes(muscleGroup.name)}
+              onChange={handleGroupSelection(muscleGroup.name)}
+              label={muscleGroup.name}
               onClick={(e) => e.stopPropagation()}
             />
           }
-          isOpen={openGroups.includes(groupKey)}
-          onToggle={toggleGroup(groupKey)}
+          isOpen={openGroups.includes(muscleGroup.name)}
+          onToggle={toggleGroup(muscleGroup.name)}
         >
           <Stack gap={2}>
-            {entries(muscleSubgroup).map(([subgroupKey, muscles]) => (
+            {muscleGroup.groups.map((subgroup) => (
               <CustomAccordion
-                key={subgroupKey}
+                key={subgroup.name}
                 title={
                   <CustomCheckbox
-                    checked={selectedSubgroups.includes(subgroupKey)}
-                    onChange={handleSubgroupSelection(subgroupKey, groupKey)}
-                    label={subgroupKey}
+                    checked={selectedSubgroups.includes(subgroup.name)}
+                    onChange={handleSubgroupSelection(subgroup.name, muscleGroup.name)}
+                    label={subgroup.name}
                     onClick={(e) => e.stopPropagation()}
                   />
                 }
-                isOpen={openSubgroups.includes(subgroupKey)}
-                onToggle={toggleSubgroup(subgroupKey)}
+                isOpen={openSubgroups.includes(subgroup.name)}
+                onToggle={toggleSubgroup(subgroup.name)}
               >
                 <Stack gap={1} pl={4}>
-                  {muscles.map((muscle) => (
+                  {subgroup.parts.map((muscle) => (
                     <CustomCheckbox
                       key={muscle}
                       checked={selectedMuscles.includes(muscle)}
-                      onChange={handleMuscleSelection(muscle, groupKey, subgroupKey)}
+                      onChange={handleMuscleSelection(muscle, muscleGroup.name, subgroup.name)}
                       label={muscle}
                     />
                   ))}

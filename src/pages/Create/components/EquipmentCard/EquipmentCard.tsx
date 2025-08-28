@@ -2,6 +2,7 @@ import { Accordion, Span, NumberInput, HStack, IconButton, Field } from "@chakra
 import { useCallback } from "react";
 import { LuMinus, LuPlus } from "react-icons/lu";
 import type { EquipmentItem } from "../../types";
+import { RU, ERRORS } from "@/locales";
 
 export const EquipmentCard = ({
   item,
@@ -92,7 +93,7 @@ export const EquipmentCard = ({
           {
             item.units.map(([number, weight], index) => (
               <Field.Root key={number} invalid={false}>
-                <Field.Label>Укажите вес в кг.</Field.Label>
+                <Field.Label>{RU.CREATE.LABELS.WEIGHT}</Field.Label>
                 <NumberInput.Root
                   defaultValue="0"
                   width="200px"
@@ -105,10 +106,10 @@ export const EquipmentCard = ({
                   <NumberInput.Input />
                 </NumberInput.Root>
                 <Field.HelperText>
-                  Для грамм указывайте (0.1)
+                  {RU.CREATE.LABELS.WEIGHT_HELP}
                 </Field.HelperText>
                 <Field.ErrorText>
-                  The entry is invalid
+                  {ERRORS.CREATE.WEIGHT_ERROR}
                 </Field.ErrorText>
               </Field.Root>
             ))

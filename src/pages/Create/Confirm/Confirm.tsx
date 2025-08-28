@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { LoadingOverlay } from '@/components/LoadingOverlay/LoadingOverlay';
 import { workoutService } from '@/services';
+import { RU, ERRORS } from '@/locales';
 
 // TODO добавить редактирование упражнений/тренировки
 // TODO добавить индикатор о генерации плана для пользователя
@@ -30,7 +31,7 @@ export const Confirm = () => {
       await workoutService.saveWorkout(workoutPlan!);
       navigate('/workouts');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка';
+      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -50,7 +51,7 @@ export const Confirm = () => {
           // onClick={generateWorkoutPlan}
           loading={isLoading}
         >
-          Попробовать снова
+          {RU.ACTIONS.RETRY}
         </Button>
 
         <Button asChild
@@ -58,7 +59,7 @@ export const Confirm = () => {
           variant="outline"
         >
           <Link to="/workouts/create">
-            Вернуться назад
+            {RU.ACTIONS.BACK}
           </Link>
         </Button>
       </Box>
@@ -71,7 +72,7 @@ export const Confirm = () => {
         <Card.Root>
           <CardBody>
             <Heading as="h2" size="md" mb={6}>
-              Ваш план тренировок готов!
+              {RU.CREATE.TITLES.CONFIRM}
             </Heading>
             {workoutPlan && workoutPlan.length && (
               <Stack gap={6}>
@@ -81,19 +82,38 @@ export const Confirm = () => {
                       {workout.name}
                     </Heading>
 
-                    <Text fontSize="sm" mb={3}>{`Упражнений в тренировке: ${workout.exercises.length}`}</Text>
+                    <Text fontSize="sm" mb={3}>
+                      {RU.CREATE.CONTENT.EXERCISES_COUNT(String(workout.exercises.length))}
+                    </Text>
 
                     <Stack gap={3}>
                       {workout.exercises.map((exercise, exIndex) => (
-                        <Box key={exIndex} borderWidth="1px" borderRadius="lg" p={4} borderColor="border.disabled" color="fg.disabled">
-                          <Text fontSize="sm" fontWeight="bold">{exercise.name}</Text>
-                          <Text fontSize="sm">
-                            {exercise.sets.length} подходов
-                            {typeof exercise.sets?.[0]?.[1] === 'number' ? ` × ${exercise.sets[0][1]} повторений` : ''}
+                        <Box
+                          key={exIndex}
+                          borderWidth="1px"
+                          borderRadius="lg"
+                          p={4}
+                          borderColor="border.disabled"
+                          color="fg.disabled"
+                        >
+                          <Text fontSize="sm" fontWeight="bold">
+                            {exercise.name}
                           </Text>
-                          <Text fontSize="sm" fontWeight="bold">Техника выполнения</Text>
-                          <Text fontSize="sm">{exercise.description}</Text>
-                          <Text fontSize="sm" fontWeight="bold">Мышцы</Text>
+                          <Text fontSize="sm">
+                            {RU.CREATE.CONTENT.SETS_AND_REPS([
+                              String(exercise.sets.length),
+                              String(exercise.sets[0][1])
+                            ])}
+                          </Text>
+                          <Text fontSize="sm" fontWeight="bold">
+                            {RU.CREATE.LABELS.TECHNIQUE}
+                          </Text>
+                          <Text fontSize="sm">
+                            {exercise.description}
+                          </Text>
+                          <Text fontSize="sm" fontWeight="bold">
+                            {RU.CREATE.LABELS.MUSCLES}
+                          </Text>
                           <Wrap>
                             {
                               exercise.muscles.map(item => (
@@ -113,7 +133,7 @@ export const Confirm = () => {
                   onClick={handleSave}
                   loading={isLoading}
                 >
-                  Сохранить
+                  {RU.ACTIONS.SAVE}
                 </Button>
               </Stack>
             )}

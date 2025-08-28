@@ -9,5 +9,5 @@
 - API клиент: Axios
 - Backend: имитация через Mock Service Worker (MSW)
 - Функциональная библиотека: Remeda
-- Сструктура папок feature-based
+- Структура папок feature-based
 - Сборщик: Vite
