@@ -1,4 +1,4 @@
-import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text, Wrap } from "@chakra-ui/react";
+import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text, VStack, Wrap } from "@chakra-ui/react";
 import { useCallback, useState, lazy, Suspense } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
@@ -217,7 +217,10 @@ export const Guided = () => {
 
                 {
                   workoutCount && (
-                    <Box as="fieldset">
+                    <VStack
+                      as="fieldset"
+                      gap={4}
+                    >
                       <Heading
                         as="legend"
                         size="md"
@@ -228,7 +231,7 @@ export const Guided = () => {
 
                       <RadioGroup.Root
                         onValueChange={(e) => setMuscleSelectionType(e.value)}
-                        mb={6}
+                        w='full'
                       >
                         <Wrap>
                           {[RU.CREATE.OPTIONS.SELECTION.FULL_BODY, RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES].map(option => (
@@ -248,16 +251,24 @@ export const Guided = () => {
 
                       {
                         muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
-                          <Suspense fallback={
-                            <Box p={4} textAlign="center">
-                              <Text color="gray.500">{RU.CREATE.SECTIONS.MUSCLE_SELECTION}</Text>
+                          <Suspense
+                            fallback={
+                              <Box
+                                p={4}
+                                textAlign="center"
+                              >
+                                <Text color="gray.500">
+                                  {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
+                                </Text>
+                              </Box>
+                            }>
+                            <Box w="full">
+                              <MuscleSelection />
                             </Box>
-                          }>
-                            <MuscleSelection />
                           </Suspense>
                         )
                       }
-                    </Box>
+                    </VStack>
                   )
                 }
 

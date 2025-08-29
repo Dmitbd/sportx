@@ -46,7 +46,6 @@ export const CustomAccordion = ({
     border="1px solid"
     borderColor="gray.200"
     borderRadius="lg"
-    mb={2}
     overflow="hidden"
     bg="white"
   >
