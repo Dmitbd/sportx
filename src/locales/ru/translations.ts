@@ -12,6 +12,7 @@ export const RU = {
 
   AUTH: {
     TITLES: {
+      LOGIN: 'Вход в систему',
       REGISTER: 'Регистрация',
     },
     LABELS: {
@@ -19,6 +20,10 @@ export const RU = {
       PASSWORD: 'Пароль',
       CONFIRM_PASSWORD: 'Подтвердите пароль',
     },
+    CONTENT: {
+      LOGIN_DESCRIPTION: 'Войдите в свой аккаунт для доступа к тренировкам',
+      REGISTER_DESCRIPTION: 'Создайте аккаунт для начала работы с приложением',
+    }
   },
 
   CREATE: {

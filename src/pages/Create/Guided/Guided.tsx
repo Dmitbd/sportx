@@ -1,4 +1,4 @@
-import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text, VStack, Wrap } from "@chakra-ui/react";
+import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text, Wrap } from "@chakra-ui/react";
 import { useCallback, useState, lazy, Suspense } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
@@ -80,7 +80,6 @@ export const Guided = () => {
         as="main"
         maxW="md"
         mx="auto"
-        mt={10}
         position="relative"
       >
         <BackButton
@@ -217,7 +216,7 @@ export const Guided = () => {
 
                 {
                   workoutCount && (
-                    <VStack
+                    <Stack
                       as="fieldset"
                       gap={4}
                     >
@@ -231,7 +230,6 @@ export const Guided = () => {
 
                       <RadioGroup.Root
                         onValueChange={(e) => setMuscleSelectionType(e.value)}
-                        w='full'
                       >
                         <Wrap>
                           {[RU.CREATE.OPTIONS.SELECTION.FULL_BODY, RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES].map(option => (
@@ -262,13 +260,11 @@ export const Guided = () => {
                                 </Text>
                               </Box>
                             }>
-                            <Box w="full">
                               <MuscleSelection />
-                            </Box>
                           </Suspense>
                         )
                       }
-                    </VStack>
+                    </Stack>
                   )
                 }
 
