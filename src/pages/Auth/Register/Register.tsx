@@ -37,7 +37,7 @@ export const Register = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, setIsLoading, setError]);
+  }, [formData, setIsLoading, setError, navigate]);
 
   if (error) {
     return (

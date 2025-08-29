@@ -6,7 +6,6 @@ import {
   Stack,
   Card,
   Flex,
-  Spacer,
   Icon,
   Text,
   Alert,
@@ -68,10 +67,8 @@ export const WorkoutsList = () => {
 
   return (
     <LoadingOverlay isLoading={isLoading}>
-      <Box p={6}>
-        <Flex mb={8} align="center">
-          <Heading as="h1" size="xl">{RU.WORKOUTS.TITLES.LIST}</Heading>
-          <Spacer />
+      <Box>
+        <Stack gap={6} mb={2} alignItems='start'>
           <RouterLink to="/workouts/create">
             <Button colorScheme="blue">
               <Icon size="lg" color="pink.700">
@@ -80,7 +77,11 @@ export const WorkoutsList = () => {
               {RU.WORKOUTS.TITLES.NEW_WORKOUT}
             </Button>
           </RouterLink>
-        </Flex>
+
+          <Heading as="h1" size="lg">
+            {RU.WORKOUTS.TITLES.LIST}
+          </Heading>
+        </Stack>
 
         {!isLoading && workouts.length === 0 ? (
           <Box textAlign="center" py={10}>

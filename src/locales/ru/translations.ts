@@ -89,23 +89,25 @@ export const RU = {
 
   WORKOUTS: {
     TITLES: {
-      LIST: 'Мои тренировки',
+      LIST: 'Мои тренировки:',
       NEW_WORKOUT: 'Новая тренировка',
     },
     CONTENT: {
       CREATED: (date: string) => `Создано: ${date}`,
     },
     LABELS: {
-      WEIGHT: 'Укажите вес в кг.',
+      WEIGHT: 'вес в кг.',
       TECHNIQUE: 'Техника выполнения',
     },
     PLURALIZATION: {
       SETS_COUNT: 'Подходов',
-      REPS_COUNT: 'Повторений',
+      REPS_COUNT: 'повторов',
     },
     MESSAGES: {
       NO_WORKOUTS: 'У вас пока нет тренировок',
+      UNSAVED_CHANGES: 'Есть несохраненные изменения',
       DELETE_CONFIRM: (name: string) => `Вы уверены, что хотите удалить ${name}?`,
+      DELETE_CONFIRM_DESCRIPTION: 'Это действие нельзя отменить'
     },
   }
 };
