@@ -1,14 +1,15 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Heading, Text, Spinner, Alert, Badge, Stack, HStack, Card, Button, Editable, ActionBar, Portal, IconButton, Dialog, Center, Accordion, Icon } from '@chakra-ui/react';
+import { Box, Heading, Text, Alert, Badge, Stack, HStack, Card, Button, Editable, ActionBar, Portal, Dialog, Accordion, Icon, Em } from '@chakra-ui/react';
 import { FiTrash2 } from 'react-icons/fi';
 import { workoutService } from '@/services/api/workoutService';
 import type { Training, UpdateWorkoutSets } from '@/types';
 import { filter, isDeepEqual, isNullish, map, pipe } from 'remeda';
-import { BackButton } from '@/shared';
-import { LoadingOverlay } from '@/components';
+import { LoadingOverlay, PageContentWrapper, PageHeader } from '@/components';
 import { ERRORS, RU } from '@/locales';
 import { LuTags } from "react-icons/lu"
+
+// TODO: подумать как отображать загрузку деталей тренировки
 
 /**
  * TODO:
@@ -37,6 +38,16 @@ export const WorkoutDetails = () => {
 
   // принудительный ключ для компонента Editable.Root из-за его специфичного обновления
   const [forceUpdate, setForceUpdate] = useState(0);
+
+  const pageHeaderActions = useMemo(() => (
+    [
+      {
+        label: RU.ACTIONS.DELETE,
+        onClick: () => setIsDeleteDialogOpen(true),
+        icon: <FiTrash2 />
+      }
+    ]
+  ), []);
 
   const hasChanges = useMemo(() => (
     !isDeepEqual(initialTraining?.exercises, training?.exercises)
@@ -222,17 +233,6 @@ export const WorkoutDetails = () => {
     fetchWorkout();
   }, [id]);
 
-  // TODO: подумать как отображать загрузку деталей тренировки
-  if (isLoading) {
-    return (
-      <Box pos="absolute" inset="0" bg="bg/80">
-        <Center h="full">
-          <Spinner size="xl" />
-        </Center>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Alert.Root status="error">
@@ -241,7 +241,7 @@ export const WorkoutDetails = () => {
     );
   }
 
-  if (!training) {
+  if (!training && !isLoading) {
     return (
       <Alert.Root status="error">
         {ERRORS.WORKOUTS.NOT_FOUND}
@@ -250,193 +250,190 @@ export const WorkoutDetails = () => {
   }
 
   return (
-    <LoadingOverlay isLoading={isDeleting}>
-      <BackButton
-        variant="plain"
-        ariaLabel={RU.ACTIONS.BACK}
+    <>
+      <PageHeader
+        title={RU.WORKOUTS.TITLES.DETAILS}
+        actions={pageHeaderActions}
       />
 
-      <HStack justify="space-between" align="center" mb={4}>
-        <Heading
-          as="h2"
-          size="lg"
-        >
-          {training.name}
-        </Heading>
+      <PageContentWrapper>
+        <LoadingOverlay isLoading={isLoading}>
+          {
+            training && (
+              <>
+                <Text mb={4}>
+                  <Em>
+                    {training.name}
+                  </Em>
+                </Text>
 
-        <IconButton
-          aria-label={RU.ACTIONS.DELETE}
-          variant="ghost"
-          colorScheme="red"
-          size="sm"
-          onClick={() => setIsDeleteDialogOpen(true)}
-        >
-          <FiTrash2 />
-        </IconButton>
-      </HStack>
+                <Stack gap={4}>
+                  {training.exercises.map((exercise, exerciseIndex) => (
+                    <Card.Root
+                      key={`${exercise.name}-${exerciseIndex}`}
+                      flexDirection="row"
+                      overflow="hidden"
+                      maxW="xl"
+                      size='sm'
+                    >
+                      <Box flex="1">
+                        <Card.Body>
+                          <Card.Title mb="2">{exercise.name}</Card.Title>
 
-      <Stack gap={4} mt={4}>
-        {training.exercises.map((exercise, exerciseIndex) => (
-          <Card.Root
-            key={`${exercise.name}-${exerciseIndex}`}
-            flexDirection="row"
-            overflow="hidden"
-            maxW="xl"
-            size='sm'
-          >
-            <Box flex="1">
-              <Card.Body>
-                <Card.Title mb="2">{exercise.name}</Card.Title>
+                          <HStack mt="2" gap="2" wrap="wrap">
+                            {exercise.muscles.map((muscle) => (
+                              <Badge key={muscle} colorPalette="purple" variant="subtle">
+                                {muscle}
+                              </Badge>
+                            ))}
+                          </HStack>
 
-                <HStack mt="2" gap="2" wrap="wrap">
-                  {exercise.muscles.map((muscle) => (
-                    <Badge key={muscle} colorPalette="purple" variant="subtle">
-                      {muscle}
-                    </Badge>
+                          <Box mt="4">
+                            <Heading as="h4" size="sm" mb={2}>
+                              {RU.WORKOUTS.PLURALIZATION.SETS_COUNT}
+                            </Heading>
+                            <Stack gap={2}>
+                              {exercise.sets.map((set, setIndex) => (
+                                <HStack
+                                  key={setIndex}
+                                  justify="space-between"
+                                  align="center"
+                                >
+                                  <Text>
+                                    {`${String(setIndex + 1)}:`}
+                                  </Text>
+                                  <HStack gap={6} align="center">
+                                    <HStack gap={2} align="center">
+                                      <Text color="gray.600">
+                                        {RU.WORKOUTS.LABELS.WEIGHT}
+                                      </Text>
+                                      <Editable.Root
+                                        key={`${exercise.name}-${setIndex}-weight-${forceUpdate}`}
+                                        textAlign="start"
+                                        value={String(set[0])}
+                                        onValueChange={({ value }) => handleChange({
+                                          exerciseName: exercise.name,
+                                          setIndex,
+                                          field: 'weight',
+                                          value
+                                        })}
+                                        maxW="40px"
+                                      >
+                                        <Editable.Preview width='40px' />
+                                        <Editable.Input />
+                                      </Editable.Root>
+                                    </HStack>
+                                    <HStack gap={2} align="center">
+                                      <Text color="gray.600">
+                                        {RU.WORKOUTS.PLURALIZATION.REPS_COUNT}:
+                                      </Text>
+                                      <Editable.Root
+                                        key={`${exercise.name}-${setIndex}-reps-${forceUpdate}`}
+                                        textAlign="start"
+                                        value={String(set[1])}
+                                        onValueChange={({ value }) => handleChange({
+                                          exerciseName: exercise.name,
+                                          setIndex,
+                                          field: 'reps',
+                                          value
+                                        })}
+                                        maxW="40px"
+                                      >
+                                        <Editable.Preview width='40px' />
+                                        <Editable.Input />
+                                      </Editable.Root>
+                                    </HStack>
+                                  </HStack>
+                                </HStack>
+                              ))}
+                            </Stack>
+                          </Box>
+                        </Card.Body>
+
+                        <Card.Footer>
+                          <Accordion.Root collapsible variant='plain'>
+                            <Accordion.Item value={exercise.name}>
+                              <Accordion.ItemTrigger>
+                                <Icon fontSize="lg" color="fg.subtle">
+                                  <LuTags />
+                                </Icon>
+                                {RU.WORKOUTS.LABELS.TECHNIQUE}
+                              </Accordion.ItemTrigger>
+                              <Accordion.ItemContent>
+                                <Accordion.ItemBody>
+                                  {exercise.description}
+                                </Accordion.ItemBody>
+                              </Accordion.ItemContent>
+                            </Accordion.Item>
+                          </Accordion.Root>
+                        </Card.Footer>
+                      </Box>
+                    </Card.Root>
                   ))}
-                </HStack>
+                </Stack>
 
-                <Box mt="4">
-                  <Heading as="h4" size="sm" mb={2}>
-                    {RU.WORKOUTS.PLURALIZATION.SETS_COUNT}
-                  </Heading>
-                  <Stack gap={2}>
-                    {exercise.sets.map((set, setIndex) => (
-                      <HStack
-                        key={setIndex}
-                        justify="space-between"
-                        align="center"
-                      >
-                        <Text>
-                          {`${String(setIndex + 1)}:`}
-                        </Text>
-                        <HStack gap={6} align="center">
-                          <HStack gap={2} align="center">
-                            <Text color="gray.600">
-                              {RU.WORKOUTS.LABELS.WEIGHT}
-                            </Text>
-                            <Editable.Root
-                              key={`${exercise.name}-${setIndex}-weight-${forceUpdate}`}
-                              textAlign="start"
-                              value={String(set[0])}
-                              onValueChange={({ value }) => handleChange({
-                                exerciseName: exercise.name,
-                                setIndex,
-                                field: 'weight',
-                                value
-                              })}
-                              maxW="40px"
-                            >
-                              <Editable.Preview width='40px' />
-                              <Editable.Input />
-                            </Editable.Root>
-                          </HStack>
-                          <HStack gap={2} align="center">
-                            <Text color="gray.600">
-                              {RU.WORKOUTS.PLURALIZATION.REPS_COUNT}:
-                            </Text>
-                            <Editable.Root
-                              key={`${exercise.name}-${setIndex}-reps-${forceUpdate}`}
-                              textAlign="start"
-                              value={String(set[1])}
-                              onValueChange={({ value }) => handleChange({
-                                exerciseName: exercise.name,
-                                setIndex,
-                                field: 'reps',
-                                value
-                              })}
-                              maxW="40px"
-                            >
-                              <Editable.Preview width='40px' />
-                              <Editable.Input />
-                            </Editable.Root>
-                          </HStack>
+                <ActionBar.Root open={hasChanges}>
+                  <Portal>
+                    <ActionBar.Positioner>
+                      <ActionBar.Content>
+                        <Text>{RU.WORKOUTS.MESSAGES.UNSAVED_CHANGES}</Text>
+                        <ActionBar.Separator />
+                        <HStack gap={2}>
+                          <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
+                            {RU.ACTIONS.CANCEL}
+                          </Button>
+                          <Button colorScheme="blue" size="sm" onClick={handleSave} disabled={isSaving} loading={isSaving}>
+                            {RU.ACTIONS.SAVE}
+                          </Button>
                         </HStack>
-                      </HStack>
-                    ))}
-                  </Stack>
-                </Box>
-              </Card.Body>
+                        {saveSuccess && (
+                          <Badge ml={3} colorPalette="green" variant="subtle">{saveSuccess}</Badge>
+                        )}
+                      </ActionBar.Content>
+                    </ActionBar.Positioner>
+                  </Portal>
+                </ActionBar.Root>
 
-              <Card.Footer>
-                <Accordion.Root collapsible variant='plain'>
-                  <Accordion.Item value={exercise.name}>
-                    <Accordion.ItemTrigger>
-                      <Icon fontSize="lg" color="fg.subtle">
-                        <LuTags />
-                      </Icon>
-                      {RU.WORKOUTS.LABELS.TECHNIQUE}
-                    </Accordion.ItemTrigger>
-                    <Accordion.ItemContent>
-                      <Accordion.ItemBody>
-                        {exercise.description}
-                      </Accordion.ItemBody>
-                    </Accordion.ItemContent>
-                  </Accordion.Item>
-                </Accordion.Root>
-              </Card.Footer>
-            </Box>
-          </Card.Root>
-        ))}
-      </Stack>
-
-      <ActionBar.Root open={hasChanges}>
-        <Portal>
-          <ActionBar.Positioner>
-            <ActionBar.Content>
-              <Text>{RU.WORKOUTS.MESSAGES.UNSAVED_CHANGES}</Text>
-              <ActionBar.Separator />
-              <HStack gap={2}>
-                <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
-                  {RU.ACTIONS.CANCEL}
-                </Button>
-                <Button colorScheme="blue" size="sm" onClick={handleSave} disabled={isSaving} loading={isSaving}>
-                  {RU.ACTIONS.SAVE}
-                </Button>
-              </HStack>
-              {saveSuccess && (
-                <Badge ml={3} colorPalette="green" variant="subtle">{saveSuccess}</Badge>
-              )}
-            </ActionBar.Content>
-          </ActionBar.Positioner>
-        </Portal>
-      </ActionBar.Root>
-
-      <Dialog.Root
-        open={isDeleteDialogOpen}
-        onOpenChange={onDeleteDialogOpenChange}
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title>{RU.ACTIONS.DELETE}</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM(training.name)}</Text>
-              <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM_DESCRIPTION}</Text>
-            </Dialog.Body>
-            <Dialog.Footer>
-              <HStack gap={2}>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                  disabled={isDeleting}
+                <Dialog.Root
+                  open={isDeleteDialogOpen}
+                  onOpenChange={onDeleteDialogOpenChange}
                 >
-                  {RU.ACTIONS.CANCEL}
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  loading={isDeleting}
-                >
-                  {RU.ACTIONS.DELETE}
-                </Button>
-              </HStack>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
-    </LoadingOverlay>
+                  <Dialog.Backdrop />
+                  <Dialog.Positioner>
+                    <Dialog.Content>
+                      <Dialog.Header>
+                        <Dialog.Title>{RU.ACTIONS.DELETE}</Dialog.Title>
+                      </Dialog.Header>
+                      <Dialog.Body>
+                        <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM(training.name)}</Text>
+                        <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM_DESCRIPTION}</Text>
+                      </Dialog.Body>
+                      <Dialog.Footer>
+                        <HStack gap={2}>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsDeleteDialogOpen(false)}
+                            disabled={isDeleting}
+                          >
+                            {RU.ACTIONS.CANCEL}
+                          </Button>
+                          <Button
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            loading={isDeleting}
+                          >
+                            {RU.ACTIONS.DELETE}
+                          </Button>
+                        </HStack>
+                      </Dialog.Footer>
+                    </Dialog.Content>
+                  </Dialog.Positioner>
+                </Dialog.Root>
+              </>
+            )
+          }
+        </LoadingOverlay>
+      </PageContentWrapper>
+    </>
   );
 };

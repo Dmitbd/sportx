@@ -1,12 +1,10 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthLayout, MainLayout } from "@/layouts";
 import { Confirm, Guided, Login, NotFound, Register, WorkoutsList, WorkoutDetails } from "@/pages";
 import { ProtectedRoute, PublicRoute } from "./components";
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -60,19 +58,22 @@ export const router = createBrowserRouter([
       },
       {
         path: 'auth',
-        element: (
-          <PublicRoute>
-            <AuthLayout />
-          </PublicRoute>
-        ),
         children: [
           {
             path: 'login',
-            element: <Login />
+            element: (
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            )
           },
           {
             path: 'register',
-            element: <Register />,
+            element: (
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            ),
           },
         ],
       },

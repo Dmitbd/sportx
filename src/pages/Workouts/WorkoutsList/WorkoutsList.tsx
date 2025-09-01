@@ -1,4 +1,4 @@
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -6,20 +6,21 @@ import {
   Stack,
   Card,
   Flex,
-  Icon,
   Text,
   Alert,
 } from '@chakra-ui/react';
-import { HiViewGridAdd } from 'react-icons/hi';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { workoutService } from '@/services/api/workoutService';
-import { LoadingOverlay } from '@/components';
+import { LoadingOverlay, PageContentWrapper, PageHeader } from '@/components';
 import type { Workout } from '@/types';
 import { ERRORS, RU } from '@/locales';
+import { CgAddR } from "react-icons/cg";
 
 export const WorkoutsList = () => {
+  const navigate = useNavigate();
+
   const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const workoutDate = (createdAt: Date) => (
@@ -28,10 +29,19 @@ export const WorkoutsList = () => {
       : new Date(createdAt).toLocaleDateString('ru-RU')
   );
 
+  const pageHeaderActions = useMemo(() => (
+    [
+      {
+        label: RU.ACTIONS.DELETE,
+        onClick: () => navigate('/workouts/create'),
+        icon: <CgAddR />
+      }
+    ]
+  ), [navigate]);
+
   useEffect(() => {
     const fetchWorkouts = async () => {
       try {
-        setIsLoading(true);
         setError(null);
         const data = await workoutService.getWorkouts();
         setWorkouts(data);
@@ -46,7 +56,7 @@ export const WorkoutsList = () => {
     fetchWorkouts();
   }, []);
 
-  if (error) {
+  if (!isLoading && error) {
     return (
       <Box p={6}>
         <Alert.Root status="error" mb={4}>
@@ -63,33 +73,28 @@ export const WorkoutsList = () => {
         </Button>
       </Box>
     );
+  };
+
+  if (!isLoading && workouts.length === 0) {
+    return (
+      <Box textAlign="center" py={10}>
+        <Text fontSize="lg" color="gray.500" mb={4}>
+          {RU.WORKOUTS.MESSAGES.NO_WORKOUTS}
+        </Text>
+      </Box>
+    );
   }
 
   return (
-    <LoadingOverlay isLoading={isLoading}>
-      <Box>
-        <Stack gap={6} mb={2} alignItems='start'>
-          <RouterLink to="/workouts/create">
-            <Button colorScheme="blue">
-              <Icon size="lg" color="pink.700">
-                <HiViewGridAdd />
-              </Icon>
-              {RU.WORKOUTS.TITLES.NEW_WORKOUT}
-            </Button>
-          </RouterLink>
+    <>
+      <PageHeader
+        title={RU.WORKOUTS.TITLES.LIST}
+        actions={pageHeaderActions}
+        hasShowBackButton={false}
+      />
 
-          <Heading as="h1" size="lg">
-            {RU.WORKOUTS.TITLES.LIST}
-          </Heading>
-        </Stack>
-
-        {!isLoading && workouts.length === 0 ? (
-          <Box textAlign="center" py={10}>
-            <Text fontSize="lg" color="gray.500" mb={4}>
-              {RU.WORKOUTS.MESSAGES.NO_WORKOUTS}
-            </Text>
-          </Box>
-        ) : (
+      <PageContentWrapper>
+        <LoadingOverlay isLoading={isLoading}>
           <Stack gap={4}>
             {workouts.map(workout => (
               <RouterLink
@@ -115,8 +120,8 @@ export const WorkoutsList = () => {
               </RouterLink>
             ))}
           </Stack>
-        )}
-      </Box>
-    </LoadingOverlay>
+        </LoadingOverlay>
+      </PageContentWrapper>
+    </>
   );
 };

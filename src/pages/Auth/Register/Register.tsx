@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ERRORS, RU } from "@/locales";
 import { useCallback, useState } from "react";
 import { authService } from "@/services";
-import { LoadingOverlay } from "@/components";
+import { LoadingOverlay, PageContentWrapper } from "@/components";
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -61,54 +61,56 @@ export const Register = () => {
   }
 
   return (
-    <LoadingOverlay isLoading={isLoading}>
-      <Stack gap={10}>
-        <Box>
-          <Heading size="lg" mb={2}>
-            {RU.AUTH.TITLES.REGISTER}
-          </Heading>
-          <Text color="gray.600">
-            {RU.AUTH.CONTENT.REGISTER_DESCRIPTION}
-          </Text>
-        </Box>
+    <PageContentWrapper>
+      <LoadingOverlay isLoading={isLoading}>
+        <Stack gap={10}>
+          <Box>
+            <Heading size="lg" mb={2}>
+              {RU.AUTH.TITLES.REGISTER}
+            </Heading>
+            <Text color="gray.600">
+              {RU.AUTH.CONTENT.REGISTER_DESCRIPTION}
+            </Text>
+          </Box>
 
-        <Stack gap={6}>
-          <Input
-            name='email'
-            value={formData.email}
-            placeholder={RU.AUTH.LABELS.EMAIL}
-            variant="outline"
-            onChange={handleFormChange}
-          />
-          <Input
-            name='password'
-            value={formData.password}
-            placeholder={RU.AUTH.LABELS.PASSWORD}
-            variant="outline"
-            onChange={handleFormChange}
-          />
-          <Input
-            name='confirmPassword'
-            value={formData.confirmPassword}
-            placeholder={RU.AUTH.LABELS.CONFIRM_PASSWORD}
-            variant="outline"
-            onChange={handleFormChange}
-          />
-        </Stack>
+          <Stack gap={6}>
+            <Input
+              name='email'
+              value={formData.email}
+              placeholder={RU.AUTH.LABELS.EMAIL}
+              variant="outline"
+              onChange={handleFormChange}
+            />
+            <Input
+              name='password'
+              value={formData.password}
+              placeholder={RU.AUTH.LABELS.PASSWORD}
+              variant="outline"
+              onChange={handleFormChange}
+            />
+            <Input
+              name='confirmPassword'
+              value={formData.confirmPassword}
+              placeholder={RU.AUTH.LABELS.CONFIRM_PASSWORD}
+              variant="outline"
+              onChange={handleFormChange}
+            />
+          </Stack>
 
-        <Stack gap={6}>
-          <Button
-            onClick={onSubmitForm}
-          >
-            {RU.ACTIONS.REGISTER}
-          </Button>
-          <Button asChild>
-            <Link to={'/auth/login'}>
-              {RU.ACTIONS.LOGIN}
-            </Link>
-          </Button>
+          <Stack gap={6}>
+            <Button
+              onClick={onSubmitForm}
+            >
+              {RU.ACTIONS.REGISTER}
+            </Button>
+            <Button asChild>
+              <Link to={'/auth/login'}>
+                {RU.ACTIONS.LOGIN}
+              </Link>
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
-    </LoadingOverlay>
+      </LoadingOverlay>
+    </PageContentWrapper>
   )
 };

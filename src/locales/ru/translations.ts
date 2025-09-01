@@ -28,8 +28,8 @@ export const RU = {
 
   CREATE: {
     TITLES: {
-      GUIDED: 'Создание программы тренировок',
-      CONFIRM: 'Предлагаемый план тренировок',
+      GUIDED: 'Создание программы',
+      CONFIRM: 'Предлагаемый план',
     },
     CONTENT: {
       EXERCISES_COUNT: (count: string) => `Упражнений в тренировке: ${count}`,
@@ -89,8 +89,8 @@ export const RU = {
 
   WORKOUTS: {
     TITLES: {
-      LIST: 'Мои тренировки:',
-      NEW_WORKOUT: 'Новая тренировка',
+      LIST: 'Мои тренировки',
+      DETAILS: 'Детали тренировки',
     },
     CONTENT: {
       CREATED: (date: string) => `Создано: ${date}`,

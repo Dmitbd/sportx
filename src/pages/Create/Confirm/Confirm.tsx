@@ -1,10 +1,11 @@
-import { Box, Button, Card, CardBody, Heading, Stack, Text, Alert, Badge, Wrap } from '@chakra-ui/react';
+import { Box, Button, Heading, Stack, Text, Alert, Badge, Wrap } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useState } from 'react';
 import { useWorkoutStore } from '@/stores/workoutStore';
 import { LoadingOverlay } from '@/components/LoadingOverlay/LoadingOverlay';
 import { workoutService } from '@/services';
 import { RU, ERRORS } from '@/locales';
+import { PageContentWrapper, PageHeader } from '@/components';
 
 // TODO добавить редактирование упражнений/тренировки
 // TODO добавить индикатор о генерации плана для пользователя
@@ -67,79 +68,76 @@ export const Confirm = () => {
   }
 
   return (
-    <LoadingOverlay isLoading={isLoading}>
-      <Box maxW="md" mx="auto" mt={10}>
-        <Card.Root>
-          <CardBody>
-            <Heading as="h2" size="md" mb={6}>
-              {RU.CREATE.TITLES.CONFIRM}
-            </Heading>
-            {workoutPlan && workoutPlan.length && (
-              <Stack gap={6}>
-                {workoutPlan.map((workout, index) => (
-                  <Box key={index} borderWidth="1px" borderRadius="lg" p={4}>
-                    <Heading as="h3" size="sm" mb={3}>
-                      {workout.name}
-                    </Heading>
+    <>
+      <PageHeader title={RU.CREATE.TITLES.CONFIRM} />
 
-                    <Text fontSize="sm" mb={3}>
-                      {RU.CREATE.CONTENT.EXERCISES_COUNT(String(workout.exercises.length))}
-                    </Text>
+      <PageContentWrapper>
+        <LoadingOverlay isLoading={isLoading}>
+          {workoutPlan && workoutPlan.length && (
+            <Stack gap={6}>
+              {workoutPlan.map((workout, index) => (
+                <Box key={index}>
+                  <Heading as="h3" size="sm" mb={3}>
+                    {workout.name}
+                  </Heading>
 
-                    <Stack gap={3}>
-                      {workout.exercises.map((exercise, exIndex) => (
-                        <Box
-                          key={exIndex}
-                          borderWidth="1px"
-                          borderRadius="lg"
-                          p={4}
-                          borderColor="border.disabled"
-                          color="fg.disabled"
-                        >
-                          <Text fontSize="sm" fontWeight="bold">
-                            {exercise.name}
-                          </Text>
-                          <Text fontSize="sm">
-                            {RU.CREATE.CONTENT.SETS_AND_REPS([
-                              String(exercise.sets.length),
-                              String(exercise.sets[0][1])
-                            ])}
-                          </Text>
-                          <Text fontSize="sm" fontWeight="bold">
-                            {RU.CREATE.LABELS.TECHNIQUE}
-                          </Text>
-                          <Text fontSize="sm">
-                            {exercise.description}
-                          </Text>
-                          <Text fontSize="sm" fontWeight="bold">
-                            {RU.CREATE.LABELS.MUSCLES}
-                          </Text>
-                          <Wrap>
-                            {
-                              exercise.muscles.map(item => (
-                                <Badge key={item}>{item}</Badge>
-                              ))
-                            }
-                          </Wrap>
-                        </Box>
-                      ))}
-                    </Stack>
-                  </Box>
-                ))}
+                  <Text fontSize="sm" mb={3}>
+                    {RU.CREATE.CONTENT.EXERCISES_COUNT(String(workout.exercises.length))}
+                  </Text>
 
-                <Button
-                  colorScheme="green"
-                  mt={4}
-                  onClick={handleSave}
-                  loading={isLoading}
-                >
-                  {RU.ACTIONS.SAVE}
-                </Button>
-              </Stack>
-            )}
-          </CardBody>
-        </Card.Root>
-      </Box>
-    </LoadingOverlay>
+                  <Stack gap={3}>
+                    {workout.exercises.map((exercise, exIndex) => (
+                      <Box
+                        key={exIndex}
+                        borderWidth="1px"
+                        borderRadius="lg"
+                        p={4}
+                        borderColor="border.disabled"
+                        color="fg.disabled"
+                      >
+                        <Text fontSize="sm" fontWeight="bold">
+                          {exercise.name}
+                        </Text>
+                        <Text fontSize="sm">
+                          {RU.CREATE.CONTENT.SETS_AND_REPS([
+                            String(exercise.sets.length),
+                            String(exercise.sets[0][1])
+                          ])}
+                        </Text>
+                        <Text fontSize="sm" fontWeight="bold">
+                          {RU.CREATE.LABELS.TECHNIQUE}
+                        </Text>
+                        <Text fontSize="sm">
+                          {exercise.description}
+                        </Text>
+                        <Text fontSize="sm" fontWeight="bold">
+                          {RU.CREATE.LABELS.MUSCLES}
+                        </Text>
+                        <Wrap>
+                          {
+                            exercise.muscles.map(item => (
+                              <Badge key={item}>{item}</Badge>
+                            ))
+                          }
+                        </Wrap>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              ))}
+
+              <Button
+                colorScheme="green"
+                mt={4}
+                onClick={handleSave}
+                loading={isLoading}
+              >
+                {RU.ACTIONS.SAVE}
+              </Button>
+            </Stack>
+          )}
+        </LoadingOverlay>
+      </PageContentWrapper>
+    </>
   );
 };
