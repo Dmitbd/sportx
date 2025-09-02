@@ -91,6 +91,7 @@ export const WorkoutsList = () => {
         title={RU.WORKOUTS.TITLES.LIST}
         actions={pageHeaderActions}
         hasShowBackButton={false}
+        disabled={isLoading}
       />
 
       <PageContentWrapper>

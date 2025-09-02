@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { GoChevronLeft } from "react-icons/go";
 import type { BackButtonProps } from "./types";
 import { RU } from "@/locales";
+import type { FC } from "react";
 
 /**
  * @description Переиспользуемый компонент кнопки "Назад" с иконкой
@@ -12,11 +13,12 @@ import { RU } from "@/locales";
  * @param size - размер кнопки
  * @returns Компонент кнопки
  */
-export const BackButton = ({
+export const BackButton: FC<BackButtonProps> = ({
   to = '/workouts',
   ariaLabel = RU.ACTIONS.BACK,
   variant = 'plain',
   size = 'md',
+  disabled = false
 }: BackButtonProps) => {
   const navigate = useNavigate();
 
@@ -30,6 +32,7 @@ export const BackButton = ({
       variant={variant}
       size={size}
       onClick={handleBack}
+      disabled={disabled}
     >
       <GoChevronLeft />
     </IconButton>

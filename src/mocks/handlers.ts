@@ -12,11 +12,13 @@ type Workout = {
   createdAt: Date;
 };
 
+const DELAY_TIMER = 1000;
+
 export const handlers = [
   // Авторизация
   http.post('/api/auth/login', async ({ request }) => {
     const { email, password } = await request.json() as LoginRequest;
-    await delay(1000);
+    await delay(DELAY_TIMER);
 
     // Валидация данных
     if (email === 'user@test.com' && password === '12345') {
@@ -35,7 +37,7 @@ export const handlers = [
   // Регистрация
   http.post('/api/auth/register', async ({ request }) => {
     const { email, password } = await request.json() as RegisterRequest;
-    await delay(1000);
+    await delay(DELAY_TIMER);
 
     // Валидация данных
     if (!email || !password) {
@@ -62,13 +64,13 @@ export const handlers = [
 
   // Выход
   http.post('/api/auth/logout', async () => {
-    await delay(1000);
+    await delay(DELAY_TIMER);
     return HttpResponse.json({ success: true }, { status: 200 });
   }),
 
   // Запрос к LLM
   http.post('/api/v1/chat/completions', async () => {
-    await delay(1000);
+    await delay(DELAY_TIMER);
     return HttpResponse.json({
       choices: [
         {
@@ -83,7 +85,7 @@ export const handlers = [
   // Сохранение тренировки
   http.post('/api/workouts/create/confirm', async ({ request }) => {
     const { workouts } = await request.json() as SaveWorkoutRequest;
-    await delay(1000);
+    await delay(DELAY_TIMER);
 
     // Валидация данных
     if (!workouts || !Array.isArray(workouts) || workouts.length === 0) {
@@ -99,7 +101,7 @@ export const handlers = [
 
   // Получение тренировок пользователя
   http.get('/api/workouts', async () => {
-    await delay(1000);
+    await delay(DELAY_TIMER);
 
     // Имитация данных тренировок
     const mockWorkouts: Workout[] = [
@@ -140,7 +142,7 @@ export const handlers = [
 
   // Получение тренировки по id
   http.get('/api/workouts/:id', async ({ params }) => {
-    await delay(1000);
+    await delay(DELAY_TIMER);
     const { id } = params;
     const mockTrainings: Training[] = [
       {
@@ -173,7 +175,7 @@ export const handlers = [
 
   // Сохранение изменений в подходах упражнения
   http.patch('/api/workouts/:id/sets', async ({ request, params }) => {
-    await delay(1000);
+    await delay(DELAY_TIMER);
     const { id } = params;
 
     const body = await request.json() as UpdateWorkoutSets;
@@ -190,7 +192,7 @@ export const handlers = [
 
   // Удаление тренировки
   http.delete('/api/workouts/:id', async ({ params }) => {
-    await delay(1000);
+    await delay(DELAY_TIMER);
     const { id } = params;
 
     if (!id) {

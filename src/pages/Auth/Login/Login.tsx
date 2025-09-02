@@ -1,10 +1,10 @@
-import { LoadingOverlay, PageContentWrapper } from "@/components";
+import { PageContentWrapper } from "@/components";
 import { authService } from "@/services";
 import { useAuthStore } from "@/stores/authStore";
 import { Alert, Box, Button, Heading, Input, Stack, Text } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
-import { Link } from "react-router-dom";
 import { RU, ERRORS } from '@/locales';
+import { LinkButton } from "@/shared";
 
 export const Login = () => {
   const { setUser } = useAuthStore();
@@ -62,49 +62,46 @@ export const Login = () => {
 
   return (
     <PageContentWrapper>
-      <LoadingOverlay isLoading={isLoading}>
-        <Stack gap={10}>
-          <Box textAlign="center">
-            <Heading size="lg" mb={2}>
-              {RU.AUTH.TITLES.LOGIN}
-            </Heading>
-            <Text color="gray.600">
-              {RU.AUTH.CONTENT.LOGIN_DESCRIPTION}
-            </Text>
-          </Box>
+      <Stack gap={10}>
+        <Box textAlign="center">
+          <Heading size="lg" mb={2}>
+            {RU.AUTH.TITLES.LOGIN}
+          </Heading>
+          <Text color="gray.600">
+            {RU.AUTH.CONTENT.LOGIN_DESCRIPTION}
+          </Text>
+        </Box>
 
-          <Stack gap={6}>
-            <Input
-              name="email"
-              placeholder={RU.AUTH.LABELS.EMAIL}
-              variant="outline"
-              value={formData.email}
-              onChange={handleFormChange}
-            />
-            <Input
-              name="password"
-              placeholder={RU.AUTH.LABELS.PASSWORD}
-              variant="outline"
-              value={formData.password}
-              onChange={handleFormChange}
-            />
-            <Button
-              loading={isLoading}
-              onClick={onSubmitForm}
-            >
-              {RU.ACTIONS.LOGIN}
-            </Button>
-            <Button
-              loading={isLoading}
-              asChild
-            >
-              <Link to={'/auth/register'}>
-                {RU.ACTIONS.REGISTER}
-              </Link>
-            </Button>
-          </Stack>
+        <Stack gap={6}>
+          <Input
+            name="email"
+            placeholder={RU.AUTH.LABELS.EMAIL}
+            variant="outline"
+            value={formData.email}
+            onChange={handleFormChange}
+            disabled={isLoading}
+          />
+          <Input
+            name="password"
+            placeholder={RU.AUTH.LABELS.PASSWORD}
+            variant="outline"
+            value={formData.password}
+            onChange={handleFormChange}
+            disabled={isLoading}
+          />
+          <Button
+            loading={isLoading}
+            onClick={onSubmitForm}
+          >
+            {RU.ACTIONS.LOGIN}
+          </Button>
+          <LinkButton
+            label={RU.ACTIONS.REGISTER}
+            to='/auth/register'
+            disabled={isLoading}
+          />
         </Stack>
-      </LoadingOverlay>
+      </Stack>
     </PageContentWrapper >
   )
 };

@@ -16,4 +16,5 @@ export interface PageHeaderProps {
   };
   /** Доп. действия на странице */
   actions?: PageHeaderAction[];
+  disabled?: boolean;
 };

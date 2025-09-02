@@ -254,6 +254,7 @@ export const WorkoutDetails = () => {
       <PageHeader
         title={RU.WORKOUTS.TITLES.DETAILS}
         actions={pageHeaderActions}
+        disabled={isLoading}
       />
 
       <PageContentWrapper>

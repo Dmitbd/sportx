@@ -7,7 +7,7 @@ import {
   INITIAL_ITEMS
 } from "../constants";
 import { useWorkoutStore } from "@/stores/workoutStore";
-import { LoadingOverlay, PageContentWrapper, PageHeader } from "@/components";
+import { PageContentWrapper, PageHeader } from "@/components";
 import { workoutCreate } from "@/services";
 import { askAI } from "@/services";
 import { RU, ERRORS } from "@/locales";
@@ -78,34 +78,119 @@ export const Guided = () => {
       <PageHeader title={RU.CREATE.TITLES.GUIDED} />
 
       <PageContentWrapper>
-        <LoadingOverlay isLoading={isLoading}>
-          <Stack
-            as="main"
-            maxW="md"
-            mx="auto"
-            position="relative"
-            gap={4}
-          >
-            <Card.Root>
-              <CardBody>
-                <form onSubmit={handleSubmit}>
-                  <Stack gap={6}>
-                    <Box as="fieldset">
-                      <Heading
-                        as="legend"
-                        size="md"
-                        mb={4}
-                      >
-                        {RU.CREATE.SECTIONS.GENDER}
+        <Stack
+          as="main"
+          maxW="md"
+          mx="auto"
+          position="relative"
+          gap={4}
+        >
+          <form onSubmit={handleSubmit}>
+            <Stack gap={6}>
+              <Card.Root size='sm'>
+                <Card.Header>
+                  <Heading size="md">
+                    {RU.CREATE.SECTIONS.GENDER}
+                  </Heading>
+                </Card.Header>
+
+                <CardBody>
+                  <RadioGroup.Root
+                    onValueChange={(e) => setGender(e.value)}
+                  >
+                    <HStack align="stretch">
+                      {RU.CREATE.OPTIONS.GENDERS.map((item) => (
+                        <RadioGroup.Item
+                          key={item}
+                          value={item}
+                        >
+                          <RadioGroup.ItemHiddenInput />
+                          <RadioGroup.ItemIndicator />
+                          <RadioGroup.ItemText>
+                            {item}
+                          </RadioGroup.ItemText>
+                        </RadioGroup.Item>
+                      ))}
+                    </HStack>
+                  </RadioGroup.Root>
+                </CardBody>
+              </Card.Root>
+
+              {
+                gender && (
+                  <Card.Root size='sm'>
+                    <Card.Header>
+                      <Heading size="md">
+                        {RU.CREATE.SECTIONS.EXPERIENCE}
                       </Heading>
+                    </Card.Header>
+
+                    <Card.Body>
                       <RadioGroup.Root
-                        onValueChange={(e) => setGender(e.value)}
+                        onValueChange={(e) => setExperience(e.value)}
                       >
-                        <HStack align="stretch">
-                          {RU.CREATE.OPTIONS.GENDERS.map((item) => (
+                        <Stack gap={3}>
+                          <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}>
+                            <RadioGroup.ItemHiddenInput />
+                            <RadioGroup.ItemIndicator />
+                            <RadioGroup.ItemText>
+                              <Box>
+                                <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {RU.CREATE.EXPERIENCE_LEVELS.NOVICE.DESCRIPTION}
+                                </Text>
+                              </Box>
+                            </RadioGroup.ItemText>
+                          </RadioGroup.Item>
+                          <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.TITLE}>
+                            <RadioGroup.ItemHiddenInput />
+                            <RadioGroup.ItemIndicator />
+                            <RadioGroup.ItemText>
+                              <Box>
+                                <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.TITLE}</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.DESCRIPTION}
+                                </Text>
+                              </Box>
+                            </RadioGroup.ItemText>
+                          </RadioGroup.Item>
+                          <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.TITLE}>
+                            <RadioGroup.ItemHiddenInput />
+                            <RadioGroup.ItemIndicator />
+                            <RadioGroup.ItemText>
+                              <Box>
+                                <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.TITLE}</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.DESCRIPTION}
+                                </Text>
+                              </Box>
+                            </RadioGroup.ItemText>
+                          </RadioGroup.Item>
+                        </Stack>
+                      </RadioGroup.Root>
+                    </Card.Body>
+                  </Card.Root>
+                )
+              }
+
+              {
+                gender && experience && (
+                  <Card.Root size='sm'>
+                    <Card.Header>
+                      <Heading size="md">
+                        {RU.CREATE.SECTIONS.WORKOUT_COUNT}
+                      </Heading>
+                    </Card.Header>
+
+                    <Card.Body>
+                      <RadioGroup.Root
+                        onValueChange={(e) => setWorkoutCount(e.value)}
+                      >
+                        <Wrap>
+                          {RU.CREATE.OPTIONS.TRAINING_DAYS.map((item) => (
                             <RadioGroup.Item
                               key={item}
-                              value={item}
+                              value={String(item)}
                             >
                               <RadioGroup.ItemHiddenInput />
                               <RadioGroup.ItemIndicator />
@@ -114,117 +199,33 @@ export const Guided = () => {
                               </RadioGroup.ItemText>
                             </RadioGroup.Item>
                           ))}
-                        </HStack>
+                        </Wrap>
                       </RadioGroup.Root>
-                    </Box>
+                    </Card.Body>
+                  </Card.Root>
+                )
+              }
 
-                    {
-                      gender && (
-                        <Box as="fieldset">
-                          <Heading
-                            as="legend"
-                            size="md"
-                            mb={4}
-                          >
-                            {RU.CREATE.SECTIONS.EXPERIENCE}
-                          </Heading>
-                          <RadioGroup.Root
-                            onValueChange={(e) => setExperience(e.value)}
-                          >
-                            <Stack gap={3}>
-                              <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}>
-                                <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.ItemText>
-                                  <Box>
-                                    <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}</Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                      {RU.CREATE.EXPERIENCE_LEVELS.NOVICE.DESCRIPTION}
-                                    </Text>
-                                  </Box>
-                                </RadioGroup.ItemText>
-                              </RadioGroup.Item>
-                              <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.TITLE}>
-                                <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.ItemText>
-                                  <Box>
-                                    <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.TITLE}</Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                      {RU.CREATE.EXPERIENCE_LEVELS.INTERMEDIATE.DESCRIPTION}
-                                    </Text>
-                                  </Box>
-                                </RadioGroup.ItemText>
-                              </RadioGroup.Item>
-                              <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.TITLE}>
-                                <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.ItemText>
-                                  <Box>
-                                    <Text fontWeight="bold">{RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.TITLE}</Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                      {RU.CREATE.EXPERIENCE_LEVELS.ADVANCED.DESCRIPTION}
-                                    </Text>
-                                  </Box>
-                                </RadioGroup.ItemText>
-                              </RadioGroup.Item>
-                            </Stack>
-                          </RadioGroup.Root>
-                        </Box>
-                      )
-                    }
+              {
+                workoutCount && (
+                  <Card.Root size='sm'>
+                    <Card.Header>
+                      <Heading size="md">
+                        {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
+                      </Heading>
+                    </Card.Header>
 
-                    {
-                      gender && experience && (
-                        <Box as="fieldset">
-                          <Heading
-                            as="legend"
-                            size="md"
-                            mb={4}
-                          >
-                            {RU.CREATE.SECTIONS.WORKOUT_COUNT}
-                          </Heading>
-                          <RadioGroup.Root
-                            onValueChange={(e) => setWorkoutCount(e.value)}
-                          >
-                            <Wrap>
-                              {RU.CREATE.OPTIONS.TRAINING_DAYS.map((item) => (
-                                <RadioGroup.Item
-                                  key={item}
-                                  value={String(item)}
-                                >
-                                  <RadioGroup.ItemHiddenInput />
-                                  <RadioGroup.ItemIndicator />
-                                  <RadioGroup.ItemText>
-                                    {item}
-                                  </RadioGroup.ItemText>
-                                </RadioGroup.Item>
-                              ))}
-                            </Wrap>
-                          </RadioGroup.Root>
-                        </Box>
-                      )
-                    }
-
-                    {
-                      workoutCount && (
-                        <Stack
-                          as="fieldset"
-                          gap={4}
+                    <Card.Body>
+                      <Stack gap={4}>
+                        <RadioGroup.Root
+                          onValueChange={(e) => setMuscleSelectionType(e.value)}
                         >
-                          <Heading
-                            as="legend"
-                            size="md"
-                            mb={4}
-                          >
-                            {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
-                          </Heading>
-
-                          <RadioGroup.Root
-                            onValueChange={(e) => setMuscleSelectionType(e.value)}
-                          >
-                            <Wrap>
-                              {[RU.CREATE.OPTIONS.SELECTION.FULL_BODY, RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES].map(option => (
+                          <Wrap>
+                            {
+                              [
+                                RU.CREATE.OPTIONS.SELECTION.FULL_BODY,
+                                RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES
+                              ].map(option => (
                                 <RadioGroup.Item
                                   key={option}
                                   value={String(option)}
@@ -236,153 +237,143 @@ export const Guided = () => {
                                   </RadioGroup.ItemText>
                                 </RadioGroup.Item>
                               ))}
-                            </Wrap>
-                          </RadioGroup.Root>
+                          </Wrap>
+                        </RadioGroup.Root>
 
-                          {
-                            muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
-                              <Suspense
-                                fallback={
-                                  <Box
-                                    p={4}
-                                    textAlign="center"
-                                  >
-                                    <Text color="gray.500">
-                                      {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
-                                    </Text>
-                                  </Box>
-                                }>
-                                <MuscleSelection />
-                              </Suspense>
-                            )
-                          }
-                        </Stack>
-                      )
-                    }
-
-                    {
-                      workoutCount && (
-                        <Box as="fieldset">
-                          <Heading
-                            as="legend"
-                            size="md"
-                            mb={4}
-                          >
-                            {RU.CREATE.SECTIONS.PLACE}
-                          </Heading>
-                          <RadioGroup.Root
-                            onValueChange={(e) => {
-                              setPlace(e.value);
-                              setHasHomeEquipment(null);
-                            }}
-                          >
-                            <Wrap>
-                              {RU.CREATE.OPTIONS.PLACES.map((item) => (
-                                <RadioGroup.Item
-                                  key={item}
-                                  value={item}
-                                  disabled={item === 'На улице'}
+                        {
+                          muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
+                            <Suspense
+                              fallback={
+                                <Box
+                                  p={4}
+                                  textAlign="center"
                                 >
-                                  <RadioGroup.ItemHiddenInput />
-                                  <RadioGroup.ItemIndicator />
-                                  <RadioGroup.ItemText>{item}</RadioGroup.ItemText>
-                                </RadioGroup.Item>
-                              ))}
-                            </Wrap>
-                          </RadioGroup.Root>
-                        </Box>
-                      )
-                    }
+                                  <Text color="gray.500">
+                                    {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
+                                  </Text>
+                                </Box>
+                              }>
+                              <MuscleSelection />
+                            </Suspense>
+                          )
+                        }
+                      </Stack>
+                    </Card.Body>
+                  </Card.Root>
+                )
+              }
 
-                    {
-                      workoutCount && place === 'Дома' && (
-                        <Box as="fieldset">
-                          <Heading
-                            as="legend"
-                            size="md"
-                            mb={4}
-                          >
-                            {RU.CREATE.SECTIONS.HOME_EQUIPMENT}
-                          </Heading>
-                          <RadioGroup.Root
-                            onValueChange={(e) => setHasHomeEquipment(e.value)}
-                            mb={4}
-                          >
-                            <Wrap>
-                              {
-                                RU.CREATE.OPTIONS.ACCEPT.map(item => (
-                                  <RadioGroup.Item
-                                    key={item}
-                                    value={String(item)}
-                                  >
-                                    <RadioGroup.ItemHiddenInput />
-                                    <RadioGroup.ItemIndicator />
-                                    <RadioGroup.ItemText>
-                                      {item}
-                                    </RadioGroup.ItemText>
-                                  </RadioGroup.Item>
-                                ))
-                              }
-                            </Wrap>
-                          </RadioGroup.Root>
+              {
+                workoutCount && muscleSelectionType && (
+                  <Card.Root size='sm'>
+                    <Card.Header>
+                      <Heading size="md">
+                        {RU.CREATE.SECTIONS.PLACE}
+                      </Heading>
+                    </Card.Header>
 
+                    <Card.Body>
+                      <RadioGroup.Root
+                        onValueChange={(e) => {
+                          setPlace(e.value);
+                          setHasHomeEquipment(null);
+                        }}
+                      >
+                        <Wrap>
+                          {RU.CREATE.OPTIONS.PLACES.map((item) => (
+                            <RadioGroup.Item
+                              key={item}
+                              value={item}
+                              disabled={item === 'На улице'}
+                            >
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.ItemText>{item}</RadioGroup.ItemText>
+                            </RadioGroup.Item>
+                          ))}
+                        </Wrap>
+                      </RadioGroup.Root>
+                    </Card.Body>
+
+                    <Card.Footer>
+                      {
+                        workoutCount && place === RU.CREATE.OPTIONS.PLACES[1] && (
+                          <Box role="note" aria-live="polite">
+                            <Text fontSize="sm" color="gray.600">
+                              {RU.CREATE.MESSAGES.GYM_EQUIPMENT}
+                            </Text>
+                          </Box>
+                        )
+                      }
+                    </Card.Footer>
+                  </Card.Root>
+                )
+              }
+
+              {
+                workoutCount && place === RU.CREATE.OPTIONS.PLACES[0] && (
+                  <Card.Root size='sm'>
+                    <Card.Header>
+                      <Heading size="md">
+                        {RU.CREATE.SECTIONS.HOME_EQUIPMENT}
+                      </Heading>
+                    </Card.Header>
+
+                    <Card.Body>
+                      <RadioGroup.Root
+                        onValueChange={(e) => setHasHomeEquipment(e.value)}
+                        mb={4}
+                      >
+                        <Wrap>
                           {
-                            hasHomeEquipment === 'true' && (
-                              <Accordion.Root
-                                variant='enclosed'
-                                collapsible
+                            RU.CREATE.OPTIONS.ACCEPT.map(item => (
+                              <RadioGroup.Item
+                                key={item}
+                                value={String(item)}
                               >
-                                {equipmentList.map(item => (
-                                  <EquipmentCard
-                                    key={item.name}
-                                    item={item}
-                                    onUpdate={handleItemUpdate}
-                                  />
-                                ))}
-                              </Accordion.Root>
-                            )
+                                <RadioGroup.ItemHiddenInput />
+                                <RadioGroup.ItemIndicator />
+                                <RadioGroup.ItemText>
+                                  {item}
+                                </RadioGroup.ItemText>
+                              </RadioGroup.Item>
+                            ))
                           }
-                        </Box>
-                      )
-                    }
+                        </Wrap>
+                      </RadioGroup.Root>
 
-                    {
-                      workoutCount && place === 'В зале' && (
-                        <Box role="note" aria-live="polite">
-                          <Text fontSize="sm" color="gray.600">
-                            {RU.CREATE.MESSAGES.GYM_EQUIPMENT}
-                          </Text>
-                        </Box>
-                      )
-                    }
-
-                    {
-                      workoutCount && place === 'На улице' && (
-                        <Box as="fieldset">
-                          <Heading
-                            as="legend"
-                            size="md"
-                            mb={4}
+                      {
+                        hasHomeEquipment === RU.CREATE.OPTIONS.ACCEPT[0] && (
+                          <Accordion.Root
+                            variant='enclosed'
+                            collapsible
                           >
-                            {RU.CREATE.SECTIONS.OUTDOOR_EQUIPMENT}
-                          </Heading>
-                        </Box>
-                      )
-                    }
-                  </Stack>
-                  <Button
-                    type="submit"
-                    colorScheme="blue"
-                    mt={6}
-                    loading={isLoading}
-                  >
-                    {RU.ACTIONS.CONTINUE}
-                  </Button>
-                </form>
-              </CardBody>
-            </Card.Root>
-          </Stack>
-        </LoadingOverlay>
+                            {equipmentList.map(item => (
+                              <EquipmentCard
+                                key={item.name}
+                                item={item}
+                                onUpdate={handleItemUpdate}
+                              />
+                            ))}
+                          </Accordion.Root>
+                        )
+                      }
+                    </Card.Body>
+                  </Card.Root>
+                )
+              }
+            </Stack>
+
+            <Button
+              type="submit"
+              colorScheme="blue"
+              mt={6}
+              loading={isLoading}
+            >
+              {RU.ACTIONS.CONTINUE}
+            </Button>
+          </form>
+        </Stack>
       </PageContentWrapper>
     </>
   );

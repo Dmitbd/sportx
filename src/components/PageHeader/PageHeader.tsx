@@ -14,7 +14,8 @@ export const PageHeader: FC<PageHeaderProps> = ({
   title,
   hasShowBackButton = true,
   backButtonConfig,
-  actions
+  actions,
+  disabled = false
 }) => {
   return (
     <Box
@@ -34,6 +35,7 @@ export const PageHeader: FC<PageHeaderProps> = ({
               <BackButton
                 variant="plain"
                 ariaLabel={RU.ACTIONS.BACK}
+                disabled={disabled}
                 {...backButtonConfig}
               />
             )
@@ -62,6 +64,7 @@ export const PageHeader: FC<PageHeaderProps> = ({
                 aria-label={label}
                 onClick={onClick}
                 variant='ghost'
+                disabled={disabled}
               >
                 {icon}
               </IconButton>

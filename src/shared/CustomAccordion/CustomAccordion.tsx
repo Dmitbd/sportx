@@ -1,5 +1,7 @@
 import { Box } from "@chakra-ui/react";
+import type { FC } from "react";
 import { LuChevronDown } from "react-icons/lu";
+import type { CustomAccordionProps } from "./types";
 
 /**
  * Кастомный аккордеон компонент в стиле Chakra UI
@@ -31,16 +33,11 @@ import { LuChevronDown } from "react-icons/lu";
  * </CustomAccordion>
  * ```
  */
-export const CustomAccordion = ({
+export const CustomAccordion: FC<CustomAccordionProps> = ({
   children,
   title,
   isOpen,
   onToggle
-}: {
-  children: React.ReactNode;
-  title: React.ReactNode;
-  isOpen: boolean;
-  onToggle: () => void;
 }) => (
   <Box
     border="1px solid"

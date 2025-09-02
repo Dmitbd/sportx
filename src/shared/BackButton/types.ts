@@ -5,4 +5,5 @@ export interface BackButtonProps {
   ariaLabel?: string;
   variant?: ButtonVariant['variant'];
   size?: ButtonVariant['size'];
+  disabled?: boolean;
 }

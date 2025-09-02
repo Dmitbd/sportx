@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Center, Spinner } from "@chakra-ui/react";
 import type { FC } from "react";
 
 interface LoadingOverlayProps {
@@ -19,9 +19,15 @@ export const LoadingOverlay: FC<LoadingOverlayProps> = ({
   return (
     <Box>
       {children}
-      {isLoading && (
-        <Box pos="absolute" inset="0" bg="bg/80" h="full" w="full" />
-      )}
+      {
+        isLoading && (
+          <Box pos="absolute" inset="0" bg="bg/80" pt={80}>
+            <Center h="full">
+              <Spinner size='lg' animationDuration="0.8s"/>
+            </Center>
+          </Box>
+        )
+      }
     </Box>
   );
 };

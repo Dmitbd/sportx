@@ -8,6 +8,7 @@ export const RU = {
     RETRY: 'Попробовать снова',
     LOGIN: 'Войти',
     REGISTER: 'Регистрация',
+    AUTH: 'Авторизация'
   },
 
   AUTH: {
@@ -78,7 +79,7 @@ export const RU = {
     OPTIONS: {
       ACCEPT: ['Да', 'Нет'],
       GENDERS: ['Мужской', 'Женский'],
-      PLACES: ['Дома', 'В зале', 'На улице'],
+      PLACES: ['Дома', 'В зале'],
       TRAINING_DAYS: [1, 2, 3, 4, 5, 6, 7],
       SELECTION: {
         FULL_BODY: 'Все тело',

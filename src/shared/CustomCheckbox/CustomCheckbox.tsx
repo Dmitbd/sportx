@@ -1,5 +1,7 @@
 import { HStack, Box, Text } from "@chakra-ui/react";
+import type { FC } from "react";
 import { LuCheck } from "react-icons/lu";
+import type { CustomCheckboxProps } from "./types";
 
 /**
  * Кастомный чекбокс компонент в стиле Chakra UI
@@ -27,16 +29,11 @@ import { LuCheck } from "react-icons/lu";
  * />
  * ```
  */
-export const CustomCheckbox = ({
+export const CustomCheckbox: FC<CustomCheckboxProps> = ({
   checked,
   onChange,
   label,
   onClick
-}: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-  onClick?: (e: React.MouseEvent) => void;
 }) => (
   <HStack
     w="full"

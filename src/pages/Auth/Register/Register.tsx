@@ -1,9 +1,10 @@
 import { Alert, Box, Button, Heading, Input, Stack, Text } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ERRORS, RU } from "@/locales";
 import { useCallback, useState } from "react";
 import { authService } from "@/services";
-import { LoadingOverlay, PageContentWrapper } from "@/components";
+import { PageContentWrapper } from "@/components";
+import { LinkButton } from "@/shared";
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -62,7 +63,6 @@ export const Register = () => {
 
   return (
     <PageContentWrapper>
-      <LoadingOverlay isLoading={isLoading}>
         <Stack gap={10}>
           <Box>
             <Heading size="lg" mb={2}>
@@ -80,6 +80,7 @@ export const Register = () => {
               placeholder={RU.AUTH.LABELS.EMAIL}
               variant="outline"
               onChange={handleFormChange}
+              disabled={isLoading}
             />
             <Input
               name='password'
@@ -87,6 +88,7 @@ export const Register = () => {
               placeholder={RU.AUTH.LABELS.PASSWORD}
               variant="outline"
               onChange={handleFormChange}
+              disabled={isLoading}
             />
             <Input
               name='confirmPassword'
@@ -94,23 +96,24 @@ export const Register = () => {
               placeholder={RU.AUTH.LABELS.CONFIRM_PASSWORD}
               variant="outline"
               onChange={handleFormChange}
+              disabled={isLoading}
             />
           </Stack>
 
           <Stack gap={6}>
             <Button
               onClick={onSubmitForm}
+              loading={isLoading}
             >
               {RU.ACTIONS.REGISTER}
             </Button>
-            <Button asChild>
-              <Link to={'/auth/login'}>
-                {RU.ACTIONS.LOGIN}
-              </Link>
-            </Button>
+            <LinkButton
+              label={RU.ACTIONS.AUTH}
+              to='/auth/login'
+              disabled={isLoading}
+            />
           </Stack>
         </Stack>
-      </LoadingOverlay>
     </PageContentWrapper>
   )
 };
