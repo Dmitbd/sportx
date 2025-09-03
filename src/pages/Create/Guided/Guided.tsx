@@ -1,12 +1,9 @@
 import { Accordion, Box, Button, Card, Center, Heading, HStack, RadioGroup, Spinner, Stack, Text, Wrap } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useCallback, useEffect, useRef, lazy, Suspense, useState } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
 import type { EquipmentItem } from "../types";
-import {
-  INITIAL_ITEMS
-} from "../constants";
-import { useWorkoutStore } from "@/stores/workoutStore";
+import { useWorkoutPlanStore, useGuidedFormStore } from "@/stores";
 import { PageContentWrapper, PageHeader } from "@/components";
 import { workoutCreate } from "@/services";
 import { askAI } from "@/services";
@@ -24,14 +21,25 @@ const MuscleSelection = lazy(() => import("../components/MuscleSelection")
  */
 export const Guided = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [gender, setGender] = useState<string | null>(null);
-  const [experience, setExperience] = useState<string | null>(null);
-  const [workoutCount, setWorkoutCount] = useState<string | null>(null);
 
-  const [place, setPlace] = useState<string | null>(null);
-  const [hasHomeEquipment, setHasHomeEquipment] = useState<string | null>(null);
-  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(INITIAL_ITEMS);
-  const [muscleSelectionType, setMuscleSelectionType] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { setWorkoutPlan, setError } = useWorkoutPlanStore();
+  const {
+    gender,
+    experience,
+    workoutCount,
+    place,
+    hasHomeEquipment,
+    equipmentList,
+    muscleSelection,
+    setGender,
+    setExperience,
+    setWorkoutCount,
+    setPlace,
+    setHasHomeEquipment,
+    updateEquipmentItem,
+    setMuscleSelection
+  } = useGuidedFormStore();
 
   const genderSectionRef = useRef<HTMLDivElement | null>(null);
   const experienceSectionRef = useRef<HTMLDivElement | null>(null);
@@ -41,41 +49,61 @@ export const Guided = () => {
   const placeSectionRef = useRef<HTMLDivElement | null>(null);
   const homeEquipmentSectionRef = useRef<HTMLDivElement | null>(null);
 
-  const navigate = useNavigate();
-  const { setWorkoutData, setWorkoutPlan, setError } = useWorkoutStore();
-
   const { scrollAndFocus, scrollWithContentWait } = useProgressiveScroll(DEFAULT_SCROLL_CONFIG);
 
   const handleItemUpdate = useCallback((updatedItem: EquipmentItem) => {
-    setEquipmentList(prev =>
-      prev.map(item => item.name === updatedItem.name ? updatedItem : item)
-    );
-  }, []);
+    updateEquipmentItem(updatedItem);
+  }, [updateEquipmentItem]);
 
   const handleGenderChange = useCallback((details: ValueChangeDetails) => {
     setGender(details.value);
-  }, []);
+  }, [setGender]);
 
   const handleExperienceChange = useCallback((details: ValueChangeDetails) => {
     setExperience(details.value);
-  }, []);
+  }, [setExperience]);
 
   const handleWorkoutCountChange = useCallback((details: ValueChangeDetails) => {
     setWorkoutCount(details.value);
-  }, []);
+  }, [setWorkoutCount]);
 
-  const handleMuscleSelectionTypeChange = useCallback((details: ValueChangeDetails) => {
-    setMuscleSelectionType(details.value);
-  }, []);
+  const handleMuscleSelectionChange = useCallback((details: ValueChangeDetails) => {
+    setMuscleSelection(details.value);
+  }, [setMuscleSelection]);
 
   const handlePlaceChange = useCallback((details: ValueChangeDetails) => {
     setPlace(details.value);
-    setHasHomeEquipment(null);
-  }, []);
+  }, [setPlace]);
 
   const handleHasHomeEquipmentChange = useCallback((details: ValueChangeDetails) => {
     setHasHomeEquipment(details.value);
-  }, []);
+  }, [setHasHomeEquipment]);
+
+  const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const prompt = workoutCreate.generateWorkoutPrompt(
+        workoutCount!,
+        place!,
+        equipmentList
+      );
+
+      const aiResponse = await askAI([{ role: 'user', content: prompt }]);
+
+      setWorkoutPlan(aiResponse.workouts);
+
+      navigate('/workouts/create/confirm');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [workoutCount, place, equipmentList, setWorkoutPlan, setError, navigate]);
 
   useEffect(() => {
     if (gender) {
@@ -96,20 +124,20 @@ export const Guided = () => {
   }, [workoutCount, scrollAndFocus]);
 
   useEffect(() => {
-    if (!muscleSelectionType) {
+    if (!muscleSelection) {
       return;
     }
-    if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
+    if (muscleSelection === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
       scrollAndFocus(muscleSelectionSectionRef.current);
       return;
     }
-    if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES) {
+    if (muscleSelection === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES) {
       return scrollWithContentWait(
         muscleSelectionContentRef,
         muscleSelectionSectionRef
       );
     }
-  }, [muscleSelectionType, scrollAndFocus, scrollWithContentWait]);
+  }, [muscleSelection, scrollAndFocus, scrollWithContentWait]);
 
   useEffect(() => {
     if (place) {
@@ -122,40 +150,6 @@ export const Guided = () => {
       scrollAndFocus(homeEquipmentSectionRef.current);
     }
   }, [hasHomeEquipment, scrollAndFocus]);
-
-  const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      setWorkoutData({
-        gender,
-        experience,
-        workoutCount,
-        place,
-        equipment: equipmentList
-      });
-
-      const prompt = workoutCreate.generateWorkoutPrompt(
-        workoutCount!,
-        place!,
-        equipmentList
-      );
-
-      const aiResponse = await askAI([{ role: 'user', content: prompt }]);
-
-      setWorkoutPlan(aiResponse.workouts);
-
-      navigate('/workouts/create/confirm');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [gender, experience, workoutCount, place, equipmentList, setWorkoutData, setWorkoutPlan, setError, navigate]);
 
   return (
     <>
@@ -311,7 +305,7 @@ export const Guided = () => {
                   <Card.Body>
                     <Stack gap={4}>
                       <RadioGroup.Root
-                        onValueChange={handleMuscleSelectionTypeChange}
+                        onValueChange={handleMuscleSelectionChange}
                       >
                         <Wrap>
                           {
@@ -334,7 +328,7 @@ export const Guided = () => {
                       </RadioGroup.Root>
 
                       {
-                        muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
+                        muscleSelection === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
                           <Suspense
                             fallback={
                               <Center>
@@ -354,7 +348,7 @@ export const Guided = () => {
             }
 
             {
-              workoutCount && muscleSelectionType && (
+              workoutCount && muscleSelection && (
                 <Card.Root
                   ref={placeSectionRef}
                   size='sm'
@@ -421,7 +415,7 @@ export const Guided = () => {
                     >
                       <Wrap>
                         {
-                          RU.CREATE.OPTIONS.ACCEPT.map(item => (
+                          RU.CREATE.OPTIONS.ACCEPT.map((item: string) => (
                             <RadioGroup.Item
                               key={item}
                               value={String(item)}

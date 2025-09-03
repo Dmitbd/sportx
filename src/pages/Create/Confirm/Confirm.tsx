@@ -1,7 +1,7 @@
 import { Box, Button, Heading, Stack, Text, Alert, Badge, Wrap } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useState } from 'react';
-import { useWorkoutStore } from '@/stores/workoutStore';
+import { useWorkoutPlanStore } from '@/stores/workoutPlanStore';
 import { workoutService } from '@/services';
 import { RU, ERRORS } from '@/locales';
 import { PageContentWrapper, PageHeader } from '@/components';
@@ -21,7 +21,7 @@ export const Confirm = () => {
 
   const {
     workoutPlan
-  } = useWorkoutStore();
+  } = useWorkoutPlanStore();
 
   const handleSave = useCallback(async () => {
     try {

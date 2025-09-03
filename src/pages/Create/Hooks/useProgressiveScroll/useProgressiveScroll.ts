@@ -16,6 +16,7 @@ export const useProgressiveScroll = (config: ScrollConfig = DEFAULT_SCROLL_CONFI
     if (!element) {
       return;
     }
+
     const rect = element.getBoundingClientRect();
     const absoluteTop = rect.top + window.scrollY - config.HEADER_OFFSET_PX;
     window.scrollTo({ top: absoluteTop, behavior: 'smooth' });
@@ -25,6 +26,7 @@ export const useProgressiveScroll = (config: ScrollConfig = DEFAULT_SCROLL_CONFI
     if (!element) {
       return;
     }
+
     element.focus({ preventScroll: true });
   }, []);
 
@@ -32,6 +34,7 @@ export const useProgressiveScroll = (config: ScrollConfig = DEFAULT_SCROLL_CONFI
     if (!element) {
       return;
     }
+
     scrollToElement(element);
     requestAnimationFrame(() => focusElement(element));
   }, [scrollToElement, focusElement]);
@@ -50,9 +53,11 @@ export const useProgressiveScroll = (config: ScrollConfig = DEFAULT_SCROLL_CONFI
 
       if (content && content.offsetHeight > 0) {
         scrollAndFocus(targetRef.current);
+
         if (onComplete) {
           onComplete();
         };
+
         return;
       }
 
@@ -62,6 +67,7 @@ export const useProgressiveScroll = (config: ScrollConfig = DEFAULT_SCROLL_CONFI
         if (onComplete) {
           onComplete()
         };
+        
         return;
       }
 

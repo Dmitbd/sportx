@@ -1,10 +1,10 @@
 import { Accordion, Span, NumberInput, HStack, IconButton, Field } from "@chakra-ui/react";
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { LuMinus, LuPlus } from "react-icons/lu";
 import type { EquipmentItem } from "../../types";
 import { RU, ERRORS } from "@/locales";
 
-export const EquipmentCard = ({
+export const EquipmentCard = memo(({
   item,
   onUpdate
 }: {
@@ -118,4 +118,4 @@ export const EquipmentCard = ({
       </Accordion.ItemContent>
     </Accordion.Item>
   );
-};
+});
