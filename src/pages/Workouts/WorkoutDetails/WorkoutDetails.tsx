@@ -6,8 +6,14 @@ import { workoutService } from '@/services/api/workoutService';
 import type { Training, UpdateWorkoutSets } from '@/types';
 import { filter, isDeepEqual, isNullish, map, pipe } from 'remeda';
 import { LoadingOverlay, PageContentWrapper, PageHeader } from '@/components';
-import { ERRORS, RU } from '@/locales';
 import { LuTags } from "react-icons/lu"
+import { RU, ERRORS } from '@/locales';
+
+const { ACTIONS, WORKOUTS } = RU;
+const {
+  COMMON: COMMON_ERRORS,
+  WORKOUTS: WORKOUTS_ERRORS
+} = ERRORS;
 
 // TODO: подумать как отображать загрузку деталей тренировки
 
@@ -42,7 +48,7 @@ export const WorkoutDetails = () => {
   const pageHeaderActions = useMemo(() => (
     [
       {
-        label: RU.ACTIONS.DELETE,
+        label: ACTIONS.DELETE,
         onClick: () => setIsDeleteDialogOpen(true),
         icon: <FiTrash2 />
       }
@@ -116,7 +122,7 @@ export const WorkoutDetails = () => {
 
       // Если нет изменений, выходим
       if (changedExercises.length === 0) {
-        setSaveSuccess(ERRORS.COMMON.NO_CHANGES);
+        setSaveSuccess(COMMON_ERRORS.NO_CHANGES);
         return;
       }
 
@@ -162,9 +168,9 @@ export const WorkoutDetails = () => {
         });
       }
 
-      setSaveSuccess(ERRORS.COMMON.CHANGES_SAVED);
+      setSaveSuccess(COMMON_ERRORS.CHANGES_SAVED);
     } catch (error) {
-      const message = error instanceof Error ? error.message : ERRORS.WORKOUTS.SAVE_ERROR;
+      const message = error instanceof Error ? error.message : WORKOUTS_ERRORS.SAVE_ERROR;
       setError(message);
     } finally {
       setIsSaving(false);
@@ -195,7 +201,7 @@ export const WorkoutDetails = () => {
 
       navigate('/workouts');
     } catch (error) {
-      const message = error instanceof Error ? error.message : ERRORS.WORKOUTS.DELETE_ERROR;
+      const message = error instanceof Error ? error.message : WORKOUTS_ERRORS.DELETE_ERROR;
       setError(message);
     } finally {
       setIsDeleting(false);
@@ -224,7 +230,7 @@ export const WorkoutDetails = () => {
         setInitialTraining(data);
         setTraining(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : ERRORS.WORKOUTS.LOAD_ERROR;
+        const errorMessage = err instanceof Error ? err.message : WORKOUTS_ERRORS.LOAD_ERROR;
         setError(errorMessage);
       } finally {
         setIsLoading(false);
@@ -244,7 +250,7 @@ export const WorkoutDetails = () => {
   if (!training && !isLoading) {
     return (
       <Alert.Root status="error">
-        {ERRORS.WORKOUTS.NOT_FOUND}
+        {WORKOUTS_ERRORS.NOT_FOUND}
       </Alert.Root>
     );
   }
@@ -252,7 +258,7 @@ export const WorkoutDetails = () => {
   return (
     <>
       <PageHeader
-        title={RU.WORKOUTS.TITLES.DETAILS}
+        title={WORKOUTS.TITLES.DETAILS}
         actions={pageHeaderActions}
         disabled={isLoading}
       />
@@ -291,7 +297,7 @@ export const WorkoutDetails = () => {
 
                           <Box mt="4">
                             <Heading as="h4" size="sm" mb={2}>
-                              {RU.WORKOUTS.PLURALIZATION.SETS_COUNT}
+                              {WORKOUTS.PLURALIZATION.SETS_COUNT}
                             </Heading>
                             <Stack gap={2}>
                               {exercise.sets.map((set, setIndex) => (
@@ -306,7 +312,7 @@ export const WorkoutDetails = () => {
                                   <HStack gap={6} align="center">
                                     <HStack gap={2} align="center">
                                       <Text color="gray.600">
-                                        {RU.WORKOUTS.LABELS.WEIGHT}
+                                        {WORKOUTS.LABELS.WEIGHT}
                                       </Text>
                                       <Editable.Root
                                         key={`${exercise.name}-${setIndex}-weight-${forceUpdate}`}
@@ -326,7 +332,7 @@ export const WorkoutDetails = () => {
                                     </HStack>
                                     <HStack gap={2} align="center">
                                       <Text color="gray.600">
-                                        {RU.WORKOUTS.PLURALIZATION.REPS_COUNT}:
+                                        {WORKOUTS.PLURALIZATION.REPS_COUNT}:
                                       </Text>
                                       <Editable.Root
                                         key={`${exercise.name}-${setIndex}-reps-${forceUpdate}`}
@@ -358,7 +364,7 @@ export const WorkoutDetails = () => {
                                 <Icon fontSize="lg" color="fg.subtle">
                                   <LuTags />
                                 </Icon>
-                                {RU.WORKOUTS.LABELS.TECHNIQUE}
+                                {WORKOUTS.LABELS.TECHNIQUE}
                               </Accordion.ItemTrigger>
                               <Accordion.ItemContent>
                                 <Accordion.ItemBody>
@@ -377,14 +383,14 @@ export const WorkoutDetails = () => {
                   <Portal>
                     <ActionBar.Positioner>
                       <ActionBar.Content>
-                        <Text>{RU.WORKOUTS.MESSAGES.UNSAVED_CHANGES}</Text>
+                        <Text>{WORKOUTS.MESSAGES.UNSAVED_CHANGES}</Text>
                         <ActionBar.Separator />
                         <HStack gap={2}>
                           <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
-                            {RU.ACTIONS.CANCEL}
+                            {ACTIONS.CANCEL}
                           </Button>
                           <Button colorScheme="blue" size="sm" onClick={handleSave} disabled={isSaving} loading={isSaving}>
-                            {RU.ACTIONS.SAVE}
+                            {ACTIONS.SAVE}
                           </Button>
                         </HStack>
                         {saveSuccess && (
@@ -403,11 +409,11 @@ export const WorkoutDetails = () => {
                   <Dialog.Positioner>
                     <Dialog.Content>
                       <Dialog.Header>
-                        <Dialog.Title>{RU.ACTIONS.DELETE}</Dialog.Title>
+                        <Dialog.Title>{ACTIONS.DELETE}</Dialog.Title>
                       </Dialog.Header>
                       <Dialog.Body>
-                        <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM(training.name)}</Text>
-                        <Text>{RU.WORKOUTS.MESSAGES.DELETE_CONFIRM_DESCRIPTION}</Text>
+                        <Text>{WORKOUTS.MESSAGES.DELETE_CONFIRM(training.name)}</Text>
+                        <Text>{WORKOUTS.MESSAGES.DELETE_CONFIRM_DESCRIPTION}</Text>
                       </Dialog.Body>
                       <Dialog.Footer>
                         <HStack gap={2}>
@@ -416,14 +422,14 @@ export const WorkoutDetails = () => {
                             onClick={() => setIsDeleteDialogOpen(false)}
                             disabled={isDeleting}
                           >
-                            {RU.ACTIONS.CANCEL}
+                            {ACTIONS.CANCEL}
                           </Button>
                           <Button
                             onClick={handleDelete}
                             disabled={isDeleting}
                             loading={isDeleting}
                           >
-                            {RU.ACTIONS.DELETE}
+                            {ACTIONS.DELETE}
                           </Button>
                         </HStack>
                       </Dialog.Footer>

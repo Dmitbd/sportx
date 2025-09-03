@@ -4,6 +4,8 @@ import type { FC, PropsWithChildren } from "react";
 import type { PageHeaderProps } from "./types";
 import { RU } from "@/locales";
 
+const { ACTIONS: { BACK } } = RU;
+
 /** Обертка для кнопок, что бы все элементы в PageHeader всегда одинаково центрировались */
 const ButtonWrapper: FC<PropsWithChildren> = ({ children }) => (
   <Box w={10}>{children}</Box>
@@ -34,7 +36,7 @@ export const PageHeader: FC<PageHeaderProps> = ({
             hasShowBackButton && (
               <BackButton
                 variant="plain"
-                ariaLabel={RU.ACTIONS.BACK}
+                ariaLabel={BACK}
                 disabled={disabled}
                 {...backButtonConfig}
               />

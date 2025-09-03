@@ -1,64 +1,63 @@
 import { useGuidedFormStore } from "@/stores";
-import { Card, Heading, HStack, RadioGroup } from "@chakra-ui/react";
+import { Card, Heading, RadioGroup, Wrap } from "@chakra-ui/react";
 import type { ValueChangeDetails } from "node_modules/@chakra-ui/react/dist/types/components/radio-group/namespace";
 import { useCallback, useEffect, useRef, type FC } from "react";
 import { DEFAULT_SCROLL_CONFIG, useProgressiveScroll } from "../../Hooks";
-import { isNullish } from "remeda";
 import { RU } from "@/locales";
 
 const {
   CREATE: {
     SECTIONS: {
-      GENDER
+      WORKOUT_COUNT
     },
     OPTIONS: {
-      GENDERS
+      TRAINING_DAYS
     }
   }
 } = RU;
 
-/** Компонент выбора гендера в форме `guided` */
-export const GenderSection: FC = () => {
-  const { gender, setGender } = useGuidedFormStore();
+/** Компонент выбора количества тренировок в форме `guided` */
+export const WorkoutCountSection: FC = () => {
+  const { workoutCount, setWorkoutCount } = useGuidedFormStore();
 
   const { scrollAndFocus } = useProgressiveScroll(DEFAULT_SCROLL_CONFIG);
 
-  const genderSectionRef = useRef<HTMLDivElement | null>(null);
+  const workoutCountSectionRef = useRef<HTMLDivElement | null>(null);
 
-  const handleGenderChange = useCallback((details: ValueChangeDetails) => {
-    setGender(details.value);
-  }, [setGender]);
+  const handleWorkoutCountChange = useCallback((details: ValueChangeDetails) => {
+    setWorkoutCount(details.value);
+  }, [setWorkoutCount]);
 
   useEffect(() => {
-    if (!isNullish(gender)) {
-      scrollAndFocus(genderSectionRef.current);
+    if (workoutCount) {
+      scrollAndFocus(workoutCountSectionRef.current);
     }
-  }, [gender, scrollAndFocus]);
+  }, [workoutCount, scrollAndFocus]);
 
   return (
     <Card.Root
-      ref={genderSectionRef}
+      ref={workoutCountSectionRef}
       size='sm'
-      aria-labelledby="guided-gender-heading"
+      aria-labelledby="guided-workout-count-heading"
     >
       <Card.Header>
         <Heading
-          id="guided-gender-heading"
+          id="guided-workout-count-heading"
           size="md"
         >
-          {GENDER}
+          {WORKOUT_COUNT}
         </Heading>
       </Card.Header>
 
       <Card.Body>
         <RadioGroup.Root
-          onValueChange={handleGenderChange}
+          onValueChange={handleWorkoutCountChange}
         >
-          <HStack align="stretch">
-            {GENDERS.map((item) => (
+          <Wrap>
+            {TRAINING_DAYS.map((item) => (
               <RadioGroup.Item
                 key={item}
-                value={item}
+                value={String(item)}
               >
                 <RadioGroup.ItemHiddenInput />
                 <RadioGroup.ItemIndicator />
@@ -67,9 +66,9 @@ export const GenderSection: FC = () => {
                 </RadioGroup.ItemText>
               </RadioGroup.Item>
             ))}
-          </HStack>
+          </Wrap>
         </RadioGroup.Root>
       </Card.Body>
     </Card.Root>
-  )
+  );
 };

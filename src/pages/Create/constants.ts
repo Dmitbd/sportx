@@ -1,5 +1,5 @@
-import { RU } from "@/locales";
 import type { EquipmentItem, MuscleGroups } from "./types";
+import { RU } from "@/locales";
 
 const {
   CREATE: {

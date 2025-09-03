@@ -4,6 +4,16 @@ import { MUSCLE_SELECTOR } from "../../constants";
 import { CustomCheckbox, CustomAccordion } from "@/shared";
 import { RU } from "@/locales";
 
+const {
+  CREATE: {
+    OPTIONS: {
+      SELECTION: {
+        FULL_BODY
+      }
+    }
+  }
+} = RU;
+
 /**
  * @description Компонент для выбора групп мышц, подгрупп и конкретных мышц для тренировки.
  * Предоставляет иерархическую структуру выбора с аккордеонами для удобной навигации.
@@ -43,8 +53,8 @@ export const MuscleSelection = memo(() => {
   const handleGroupSelection = useCallback((groupKey: string) => (checked: boolean) => {
     if (checked) {
       // Если выбираем "Все тело", очищаем все остальные выборы
-      if (groupKey === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
-        setSelectedGroups([RU.CREATE.OPTIONS.SELECTION.FULL_BODY]);
+      if (groupKey === FULL_BODY) {
+        setSelectedGroups([FULL_BODY]);
         setSelectedSubgroups([]);
         setSelectedMuscles([]);
         return;
@@ -57,14 +67,14 @@ export const MuscleSelection = memo(() => {
         const allSubgroups = muscleGroup.groups.map(group => group.name);
         const allMuscles = muscleGroup.groups.flatMap(group => group.parts);
 
-        setSelectedGroups(prev => [...prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY), groupKey]);
+        setSelectedGroups(prev => [...prev.filter(g => g !== FULL_BODY), groupKey]);
         setSelectedSubgroups(prev => [...prev, ...allSubgroups]);
         setSelectedMuscles(prev => [...prev, ...allMuscles]);
       }
     } else {
       // Если снимаем "Все тело", просто убираем его
-      if (groupKey === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
-        setSelectedGroups(prev => prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY));
+      if (groupKey === FULL_BODY) {
+        setSelectedGroups(prev => prev.filter(g => g !== FULL_BODY));
         return;
       }
 
@@ -89,7 +99,7 @@ export const MuscleSelection = memo(() => {
       const subgroup = muscleGroup?.groups.find(group => group.name === subgroupKey);
       const muscles = subgroup?.parts ?? [];
 
-      setSelectedGroups(prev => [...prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY), groupKey]);
+      setSelectedGroups(prev => [...prev.filter(g => g !== FULL_BODY), groupKey]);
       setSelectedSubgroups(prev => [...prev, subgroupKey]);
       setSelectedMuscles(prev => [...prev, ...muscles]);
     } else {
@@ -118,7 +128,7 @@ export const MuscleSelection = memo(() => {
   const handleMuscleSelection = useCallback((muscle: string, groupKey: string, subgroupKey: string) => (checked: boolean) => {
     // При выборе отдельной мышцы снимаем "Все тело"
     if (checked) {
-      setSelectedGroups(prev => [...prev.filter(g => g !== RU.CREATE.OPTIONS.SELECTION.FULL_BODY), groupKey]);
+      setSelectedGroups(prev => [...prev.filter(g => g !== FULL_BODY), groupKey]);
       setSelectedSubgroups(prev => [...prev, subgroupKey]);
       setSelectedMuscles(prev => [...prev, muscle]);
     } else {
@@ -154,50 +164,56 @@ export const MuscleSelection = memo(() => {
 
   return (
     <Stack gap={2}>
-      {MUSCLE_SELECTOR.map((muscleGroup) => (
-        <CustomAccordion
-          key={muscleGroup.name}
-          title={
-            <CustomCheckbox
-              checked={selectedGroups.includes(muscleGroup.name)}
-              onChange={handleGroupSelection(muscleGroup.name)}
-              label={muscleGroup.name}
-              onClick={(e) => e.stopPropagation()}
-            />
-          }
-          isOpen={openGroups.includes(muscleGroup.name)}
-          onToggle={toggleGroup(muscleGroup.name)}
-        >
-          <Stack gap={2}>
-            {muscleGroup.groups.map((subgroup) => (
-              <CustomAccordion
-                key={subgroup.name}
-                title={
-                  <CustomCheckbox
-                    checked={selectedSubgroups.includes(subgroup.name)}
-                    onChange={handleSubgroupSelection(subgroup.name, muscleGroup.name)}
-                    label={subgroup.name}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                }
-                isOpen={openSubgroups.includes(subgroup.name)}
-                onToggle={toggleSubgroup(subgroup.name)}
-              >
-                <Stack gap={1} pl={4}>
-                  {subgroup.parts.map((muscle) => (
-                    <CustomCheckbox
-                      key={muscle}
-                      checked={selectedMuscles.includes(muscle)}
-                      onChange={handleMuscleSelection(muscle, muscleGroup.name, subgroup.name)}
-                      label={muscle}
-                    />
-                  ))}
-                </Stack>
-              </CustomAccordion>
-            ))}
-          </Stack>
-        </CustomAccordion>
-      ))}
+      {
+        MUSCLE_SELECTOR.map((muscleGroup) => (
+          <CustomAccordion
+            key={muscleGroup.name}
+            title={
+              <CustomCheckbox
+                checked={selectedGroups.includes(muscleGroup.name)}
+                onChange={handleGroupSelection(muscleGroup.name)}
+                label={muscleGroup.name}
+                onClick={(e) => e.stopPropagation()}
+              />
+            }
+            isOpen={openGroups.includes(muscleGroup.name)}
+            onToggle={toggleGroup(muscleGroup.name)}
+          >
+            <Stack gap={2}>
+              {
+                muscleGroup.groups.map((subgroup) => (
+                  <CustomAccordion
+                    key={subgroup.name}
+                    title={
+                      <CustomCheckbox
+                        checked={selectedSubgroups.includes(subgroup.name)}
+                        onChange={handleSubgroupSelection(subgroup.name, muscleGroup.name)}
+                        label={subgroup.name}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    }
+                    isOpen={openSubgroups.includes(subgroup.name)}
+                    onToggle={toggleSubgroup(subgroup.name)}
+                  >
+                    <Stack gap={1} pl={4}>
+                      {
+                        subgroup.parts.map((muscle) => (
+                          <CustomCheckbox
+                            key={muscle}
+                            checked={selectedMuscles.includes(muscle)}
+                            onChange={handleMuscleSelection(muscle, muscleGroup.name, subgroup.name)}
+                            label={muscle}
+                          />
+                        ))
+                      }
+                    </Stack>
+                  </CustomAccordion>
+                ))
+              }
+            </Stack>
+          </CustomAccordion>
+        ))
+      }
     </Stack>
   );
 });

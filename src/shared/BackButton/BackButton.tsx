@@ -2,8 +2,10 @@ import { IconButton } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { GoChevronLeft } from "react-icons/go";
 import type { BackButtonProps } from "./types";
-import { RU } from "@/locales";
 import type { FC } from "react";
+import { RU } from "@/locales";
+
+const { ACTIONS: { BACK } } = RU;
 
 /**
  * @description Переиспользуемый компонент кнопки "Назад" с иконкой
@@ -15,7 +17,7 @@ import type { FC } from "react";
  */
 export const BackButton: FC<BackButtonProps> = ({
   to = '/workouts',
-  ariaLabel = RU.ACTIONS.BACK,
+  ariaLabel = BACK,
   variant = 'plain',
   size = 'md',
   disabled = false

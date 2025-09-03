@@ -1,10 +1,13 @@
 import { Alert, Box, Button, Heading, Input, Stack, Text } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { ERRORS, RU } from "@/locales";
 import { useCallback, useState } from "react";
 import { authService } from "@/services";
 import { PageContentWrapper } from "@/components";
 import { LinkButton } from "@/shared";
+import { RU, ERRORS } from "@/locales";
+
+const { AUTH, ACTIONS } = RU;
+const { COMMON: { ERROR } } = ERRORS;
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -33,7 +36,7 @@ export const Register = () => {
       await authService.register(formData);
       navigate('/auth/login')
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
+      const errorMessage = err instanceof Error ? err.message : ERROR;
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -46,7 +49,7 @@ export const Register = () => {
         <Alert.Root status="error" mb={4}>
           <Alert.Indicator />
           <Alert.Title>
-            {ERRORS.COMMON.ERROR}
+            {ERROR}
           </Alert.Title>
           <Alert.Description>{error}</Alert.Description>
         </Alert.Root>
@@ -55,7 +58,7 @@ export const Register = () => {
           // TODO: передавать метод загрузки, а не reload
           onClick={() => window.location.reload()}
         >
-          {RU.ACTIONS.RETRY}
+          {ACTIONS.RETRY}
         </Button>
       </Box>
     );
@@ -63,57 +66,57 @@ export const Register = () => {
 
   return (
     <PageContentWrapper>
-        <Stack gap={10}>
-          <Box>
-            <Heading size="lg" mb={2}>
-              {RU.AUTH.TITLES.REGISTER}
-            </Heading>
-            <Text color="gray.600">
-              {RU.AUTH.CONTENT.REGISTER_DESCRIPTION}
-            </Text>
-          </Box>
+      <Stack gap={10}>
+        <Box>
+          <Heading size="lg" mb={2}>
+            {AUTH.TITLES.REGISTER}
+          </Heading>
+          <Text color="gray.600">
+            {AUTH.CONTENT.REGISTER_DESCRIPTION}
+          </Text>
+        </Box>
 
-          <Stack gap={6}>
-            <Input
-              name='email'
-              value={formData.email}
-              placeholder={RU.AUTH.LABELS.EMAIL}
-              variant="outline"
-              onChange={handleFormChange}
-              disabled={isLoading}
-            />
-            <Input
-              name='password'
-              value={formData.password}
-              placeholder={RU.AUTH.LABELS.PASSWORD}
-              variant="outline"
-              onChange={handleFormChange}
-              disabled={isLoading}
-            />
-            <Input
-              name='confirmPassword'
-              value={formData.confirmPassword}
-              placeholder={RU.AUTH.LABELS.CONFIRM_PASSWORD}
-              variant="outline"
-              onChange={handleFormChange}
-              disabled={isLoading}
-            />
-          </Stack>
-
-          <Stack gap={6}>
-            <Button
-              onClick={onSubmitForm}
-              loading={isLoading}
-            >
-              {RU.ACTIONS.REGISTER}
-            </Button>
-            <LinkButton
-              label={RU.ACTIONS.AUTH}
-              to='/auth/login'
-              disabled={isLoading}
-            />
-          </Stack>
+        <Stack gap={6}>
+          <Input
+            name='email'
+            value={formData.email}
+            placeholder={AUTH.LABELS.EMAIL}
+            variant="outline"
+            onChange={handleFormChange}
+            disabled={isLoading}
+          />
+          <Input
+            name='password'
+            value={formData.password}
+            placeholder={AUTH.LABELS.PASSWORD}
+            variant="outline"
+            onChange={handleFormChange}
+            disabled={isLoading}
+          />
+          <Input
+            name='confirmPassword'
+            value={formData.confirmPassword}
+            placeholder={AUTH.LABELS.CONFIRM_PASSWORD}
+            variant="outline"
+            onChange={handleFormChange}
+            disabled={isLoading}
+          />
         </Stack>
+
+        <Stack gap={6}>
+          <Button
+            onClick={onSubmitForm}
+            loading={isLoading}
+          >
+            {ACTIONS.REGISTER}
+          </Button>
+          <LinkButton
+            label={ACTIONS.AUTH}
+            to='/auth/login'
+            disabled={isLoading}
+          />
+        </Stack>
+      </Stack>
     </PageContentWrapper>
   )
 };

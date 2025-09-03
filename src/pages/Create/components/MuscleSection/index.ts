@@ -1,0 +1,1 @@
+export { MuscleSection } from './MuscleSection';

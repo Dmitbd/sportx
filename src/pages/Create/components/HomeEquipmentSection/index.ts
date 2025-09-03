@@ -1,0 +1,1 @@
+export { HomeEquipmentSection } from './HomeEquipmentSection';

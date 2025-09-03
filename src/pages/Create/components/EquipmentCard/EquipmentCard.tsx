@@ -4,6 +4,17 @@ import { LuMinus, LuPlus } from "react-icons/lu";
 import type { EquipmentItem } from "../../types";
 import { RU, ERRORS } from "@/locales";
 
+const {
+  CREATE: {
+    LABELS: {
+      WEIGHT,
+      WEIGHT_HELP
+    }
+  }
+} = RU;
+
+const { CREATE: CREATE_ERROS } = ERRORS;
+
 export const EquipmentCard = memo(({
   item,
   onUpdate
@@ -93,7 +104,7 @@ export const EquipmentCard = memo(({
           {
             item.units.map(([number, weight], index) => (
               <Field.Root key={number} invalid={false}>
-                <Field.Label>{RU.CREATE.LABELS.WEIGHT}</Field.Label>
+                <Field.Label>{WEIGHT}</Field.Label>
                 <NumberInput.Root
                   defaultValue="0"
                   width="200px"
@@ -106,10 +117,10 @@ export const EquipmentCard = memo(({
                   <NumberInput.Input />
                 </NumberInput.Root>
                 <Field.HelperText>
-                  {RU.CREATE.LABELS.WEIGHT_HELP}
+                  {WEIGHT_HELP}
                 </Field.HelperText>
                 <Field.ErrorText>
-                  {ERRORS.CREATE.WEIGHT_ERROR}
+                  {CREATE_ERROS.WEIGHT_ERROR}
                 </Field.ErrorText>
               </Field.Root>
             ))

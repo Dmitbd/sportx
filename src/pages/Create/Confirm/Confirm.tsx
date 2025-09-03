@@ -3,8 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useState } from 'react';
 import { useWorkoutPlanStore } from '@/stores/workoutPlanStore';
 import { workoutService } from '@/services';
-import { RU, ERRORS } from '@/locales';
 import { PageContentWrapper, PageHeader } from '@/components';
+import { RU, ERRORS } from '@/locales';
+
+const { ACTIONS, CREATE } = RU;
+const { COMMON: COMMON_ERRORS } = ERRORS;
 
 // TODO добавить редактирование упражнений/тренировки
 // TODO добавить индикатор о генерации плана для пользователя
@@ -31,7 +34,7 @@ export const Confirm = () => {
       await workoutService.saveWorkout(workoutPlan!);
       navigate('/workouts');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
+      const errorMessage = err instanceof Error ? err.message : COMMON_ERRORS.ERROR;
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -51,7 +54,7 @@ export const Confirm = () => {
           // onClick={generateWorkoutPlan}
           loading={isLoading}
         >
-          {RU.ACTIONS.RETRY}
+          {ACTIONS.RETRY}
         </Button>
 
         <Button asChild
@@ -59,7 +62,7 @@ export const Confirm = () => {
           variant="outline"
         >
           <Link to="/workouts/create">
-            {RU.ACTIONS.BACK}
+            {ACTIONS.BACK}
           </Link>
         </Button>
       </Box>
@@ -69,7 +72,7 @@ export const Confirm = () => {
   return (
     <>
       <PageHeader
-        title={RU.CREATE.TITLES.CONFIRM}
+        title={CREATE.TITLES.CONFIRM}
         backButtonConfig={{ to: '/workouts/create' }}
       />
 
@@ -83,7 +86,7 @@ export const Confirm = () => {
                 </Heading>
 
                 <Text fontSize="sm" mb={3}>
-                  {RU.CREATE.CONTENT.EXERCISES_COUNT(String(workout.exercises.length))}
+                  {CREATE.CONTENT.EXERCISES_COUNT(String(workout.exercises.length))}
                 </Text>
 
                 <Stack gap={3}>
@@ -100,19 +103,19 @@ export const Confirm = () => {
                         {exercise.name}
                       </Text>
                       <Text fontSize="sm">
-                        {RU.CREATE.CONTENT.SETS_AND_REPS([
+                        {CREATE.CONTENT.SETS_AND_REPS([
                           String(exercise.sets.length),
                           String(exercise.sets[0][1])
                         ])}
                       </Text>
                       <Text fontSize="sm" fontWeight="bold">
-                        {RU.CREATE.LABELS.TECHNIQUE}
+                        {CREATE.LABELS.TECHNIQUE}
                       </Text>
                       <Text fontSize="sm">
                         {exercise.description}
                       </Text>
                       <Text fontSize="sm" fontWeight="bold">
-                        {RU.CREATE.LABELS.MUSCLES}
+                        {CREATE.LABELS.MUSCLES}
                       </Text>
                       <Wrap>
                         {
@@ -133,7 +136,7 @@ export const Confirm = () => {
               onClick={handleSave}
               loading={isLoading}
             >
-              {RU.ACTIONS.SAVE}
+              {ACTIONS.SAVE}
             </Button>
           </Stack>
         )}

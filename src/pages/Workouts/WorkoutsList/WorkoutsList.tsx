@@ -1,20 +1,17 @@
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Heading,
-  Stack,
-  Card,
-  Flex,
-  Text,
-  Alert,
-} from '@chakra-ui/react';
+import { Box, Button, Heading, Stack, Card, Flex, Text, Alert } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { workoutService } from '@/services/api/workoutService';
 import { LoadingOverlay, PageContentWrapper, PageHeader } from '@/components';
 import type { Workout } from '@/types';
-import { ERRORS, RU } from '@/locales';
 import { CgAddR } from "react-icons/cg";
+import { RU, ERRORS } from '@/locales';
+
+const { ACTIONS, WORKOUTS } = RU;
+const {
+  COMMON: COMMON_ERRORS,
+  WORKOUTS: WORKOUTS_ERRORS
+} = ERRORS;
 
 export const WorkoutsList = () => {
   const navigate = useNavigate();
@@ -32,7 +29,7 @@ export const WorkoutsList = () => {
   const pageHeaderActions = useMemo(() => (
     [
       {
-        label: RU.ACTIONS.DELETE,
+        label: ACTIONS.DELETE,
         onClick: () => navigate('/workouts/create'),
         icon: <CgAddR />
       }
@@ -46,7 +43,7 @@ export const WorkoutsList = () => {
         const data = await workoutService.getWorkouts();
         setWorkouts(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
+        const errorMessage = err instanceof Error ? err.message : COMMON_ERRORS.ERROR;
         setError(errorMessage);
       } finally {
         setIsLoading(false);
@@ -61,7 +58,7 @@ export const WorkoutsList = () => {
       <Box p={6}>
         <Alert.Root status="error" mb={4}>
           <Alert.Indicator />
-          <Alert.Title>{ERRORS.WORKOUTS.LOAD_ERROR}</Alert.Title>
+          <Alert.Title>{WORKOUTS_ERRORS.LOAD_ERROR}</Alert.Title>
           <Alert.Description>{error}</Alert.Description>
         </Alert.Root>
         <Button
@@ -69,7 +66,7 @@ export const WorkoutsList = () => {
           // TODO: передавать метод загрузки, а не reload
           onClick={() => window.location.reload()}
         >
-          {RU.ACTIONS.RETRY}
+          {ACTIONS.RETRY}
         </Button>
       </Box>
     );
@@ -79,7 +76,7 @@ export const WorkoutsList = () => {
     return (
       <Box textAlign="center" py={10}>
         <Text fontSize="lg" color="gray.500" mb={4}>
-          {RU.WORKOUTS.MESSAGES.NO_WORKOUTS}
+          {WORKOUTS.MESSAGES.NO_WORKOUTS}
         </Text>
       </Box>
     );
@@ -88,7 +85,7 @@ export const WorkoutsList = () => {
   return (
     <>
       <PageHeader
-        title={RU.WORKOUTS.TITLES.LIST}
+        title={WORKOUTS.TITLES.LIST}
         actions={pageHeaderActions}
         hasShowBackButton={false}
         disabled={isLoading}
@@ -112,7 +109,7 @@ export const WorkoutsList = () => {
                           {workout.exercises.join(', ')}
                         </Text>
                         <Text fontSize="sm" color="gray.500" mt={1}>
-                          {RU.WORKOUTS.CONTENT.CREATED(workoutDate(workout.createdAt))}
+                          {WORKOUTS.CONTENT.CREATED(workoutDate(workout.createdAt))}
                         </Text>
                       </Box>
                     </Flex>

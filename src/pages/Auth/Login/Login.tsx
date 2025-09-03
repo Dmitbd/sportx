@@ -3,8 +3,11 @@ import { authService } from "@/services";
 import { useAuthStore } from "@/stores/authStore";
 import { Alert, Box, Button, Heading, Input, Stack, Text } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
-import { RU, ERRORS } from '@/locales';
 import { LinkButton } from "@/shared";
+import { RU, ERRORS } from '@/locales';
+
+const { AUTH, ACTIONS } = RU;
+const { COMMON: { ERROR } } = ERRORS;
 
 export const Login = () => {
   const { setUser } = useAuthStore();
@@ -32,7 +35,7 @@ export const Login = () => {
       const user = await authService.login(formData);
       setUser(user);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : ERRORS.COMMON.ERROR;
+      const errorMessage = err instanceof Error ? err.message : ERROR;
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -45,7 +48,7 @@ export const Login = () => {
         <Alert.Root status="error" mb={4}>
           <Alert.Indicator />
           <Alert.Title>
-            {ERRORS.COMMON.ERROR}
+            {ERROR}
           </Alert.Title>
           <Alert.Description>{error}</Alert.Description>
         </Alert.Root>
@@ -54,7 +57,7 @@ export const Login = () => {
           // TODO: передавать метод загрузки, а не reload
           onClick={() => window.location.reload()}
         >
-          {RU.ACTIONS.RETRY}
+          {ACTIONS.RETRY}
         </Button>
       </Box>
     );
@@ -65,17 +68,17 @@ export const Login = () => {
       <Stack gap={10}>
         <Box textAlign="center">
           <Heading size="lg" mb={2}>
-            {RU.AUTH.TITLES.LOGIN}
+            {AUTH.TITLES.LOGIN}
           </Heading>
           <Text color="gray.600">
-            {RU.AUTH.CONTENT.LOGIN_DESCRIPTION}
+            {AUTH.CONTENT.LOGIN_DESCRIPTION}
           </Text>
         </Box>
 
         <Stack gap={6}>
           <Input
             name="email"
-            placeholder={RU.AUTH.LABELS.EMAIL}
+            placeholder={AUTH.LABELS.EMAIL}
             variant="outline"
             value={formData.email}
             onChange={handleFormChange}
@@ -83,7 +86,7 @@ export const Login = () => {
           />
           <Input
             name="password"
-            placeholder={RU.AUTH.LABELS.PASSWORD}
+            placeholder={AUTH.LABELS.PASSWORD}
             variant="outline"
             value={formData.password}
             onChange={handleFormChange}
@@ -93,10 +96,10 @@ export const Login = () => {
             loading={isLoading}
             onClick={onSubmitForm}
           >
-            {RU.ACTIONS.LOGIN}
+            {ACTIONS.AUTH}
           </Button>
           <LinkButton
-            label={RU.ACTIONS.REGISTER}
+            label={ACTIONS.REGISTER}
             to='/auth/register'
             disabled={isLoading}
           />
