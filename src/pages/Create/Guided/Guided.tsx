@@ -13,6 +13,7 @@ import { askAI } from "@/services";
 import { RU, ERRORS } from "@/locales";
 import { isNullish } from "remeda";
 import type { ValueChangeDetails } from "node_modules/@chakra-ui/react/dist/types/components/radio-group/namespace";
+import { useProgressiveScroll, DEFAULT_SCROLL_CONFIG } from "../Hooks";
 
 const MuscleSelection = lazy(() => import("../components/MuscleSelection")
   .then(module => ({ default: module.MuscleSelection })));
@@ -43,37 +44,13 @@ export const Guided = () => {
   const navigate = useNavigate();
   const { setWorkoutData, setWorkoutPlan, setError } = useWorkoutStore();
 
+  const { scrollAndFocus, scrollWithContentWait } = useProgressiveScroll(DEFAULT_SCROLL_CONFIG);
+
   const handleItemUpdate = useCallback((updatedItem: EquipmentItem) => {
     setEquipmentList(prev =>
       prev.map(item => item.name === updatedItem.name ? updatedItem : item)
     );
   }, []);
-
-  const scrollToElement = useCallback((element: HTMLElement | null) => {
-    if (!element) {
-      return;
-    }
-    const HEADER_OFFSET_PX = 60;
-    const rect = element.getBoundingClientRect();
-    const absoluteTop = rect.top + window.scrollY - HEADER_OFFSET_PX;
-    window.scrollTo({ top: absoluteTop, behavior: 'smooth' });
-  }, []);
-
-  const focusElement = useCallback((element: HTMLElement | null) => {
-    if (!element) {
-      return;
-    }
-
-    element.focus({ preventScroll: true });
-  }, []);
-
-  const scrollAndFocus = useCallback((element: HTMLElement | null) => {
-    if (!element) {
-      return;
-    }
-    scrollToElement(element);
-    requestAnimationFrame(() => focusElement(element));
-  }, [scrollToElement, focusElement]);
 
   const handleGenderChange = useCallback((details: ValueChangeDetails) => {
     setGender(details.value);
@@ -127,21 +104,12 @@ export const Guided = () => {
       return;
     }
     if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES) {
-      let rafId = 0;
-      const tryScroll = () => {
-        const content = muscleSelectionContentRef.current;
-        if (content && content.offsetHeight > 0) {
-          scrollAndFocus(muscleSelectionSectionRef.current);
-          return;
-        }
-        rafId = requestAnimationFrame(tryScroll);
-      };
-      rafId = requestAnimationFrame(tryScroll);
-      return () => {
-        if (rafId) cancelAnimationFrame(rafId);
-      };
+      return scrollWithContentWait(
+        muscleSelectionContentRef,
+        muscleSelectionSectionRef
+      );
     }
-  }, [muscleSelectionType, scrollAndFocus]);
+  }, [muscleSelectionType, scrollAndFocus, scrollWithContentWait]);
 
   useEffect(() => {
     if (place) {
