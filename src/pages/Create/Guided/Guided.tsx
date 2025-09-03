@@ -1,5 +1,5 @@
-import { Accordion, Box, Button, Card, CardBody, Heading, HStack, RadioGroup, Stack, Text, Wrap } from "@chakra-ui/react";
-import { useCallback, useState, lazy, Suspense } from "react";
+import { Accordion, Box, Button, Card, CardBody, Center, Heading, HStack, RadioGroup, Spinner, Stack, Text, Wrap } from "@chakra-ui/react";
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
 import type { EquipmentItem } from "../types";
@@ -11,6 +11,7 @@ import { PageContentWrapper, PageHeader } from "@/components";
 import { workoutCreate } from "@/services";
 import { askAI } from "@/services";
 import { RU, ERRORS } from "@/locales";
+import { isNullish } from "remeda";
 
 const MuscleSelection = lazy(() => import("../components/MuscleSelection")
   .then(module => ({ default: module.MuscleSelection })));
@@ -30,6 +31,14 @@ export const Guided = () => {
   const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(INITIAL_ITEMS);
   const [muscleSelectionType, setMuscleSelectionType] = useState<string | null>(null);
 
+  const genderSectionRef = useRef<HTMLDivElement | null>(null);
+  const experienceSectionRef = useRef<HTMLDivElement | null>(null);
+  const workoutCountSectionRef = useRef<HTMLDivElement | null>(null);
+  const muscleSelectionSectionRef = useRef<HTMLDivElement | null>(null);
+  const muscleSelectionContentRef = useRef<HTMLDivElement | null>(null);
+  const placeSectionRef = useRef<HTMLDivElement | null>(null);
+  const homeEquipmentSectionRef = useRef<HTMLDivElement | null>(null);
+
   const navigate = useNavigate();
   const { setWorkoutData, setWorkoutPlan, setError } = useWorkoutStore();
 
@@ -38,6 +47,96 @@ export const Guided = () => {
       prev.map(item => item.name === updatedItem.name ? updatedItem : item)
     );
   }, []);
+
+  const scrollToElement = useCallback((element: HTMLElement | null) => {
+    if (!element) {
+      return;
+    }
+    const HEADER_OFFSET_PX = 60;
+    const rect = element.getBoundingClientRect();
+    const absoluteTop = rect.top + window.scrollY - HEADER_OFFSET_PX;
+    window.scrollTo({ top: absoluteTop, behavior: 'smooth' });
+  }, []);
+
+  const handleGenderChange = useCallback((details: { value: string | null }) => {
+    setGender(details.value);
+  }, []);
+
+  const handleExperienceChange = useCallback((details: { value: string | null }) => {
+    setExperience(details.value);
+  }, []);
+
+  const handleWorkoutCountChange = useCallback((details: { value: string | null }) => {
+    setWorkoutCount(details.value);
+  }, []);
+
+  const handleMuscleSelectionTypeChange = useCallback((details: { value: string | null }) => {
+    setMuscleSelectionType(details.value);
+  }, []);
+
+  const handlePlaceChange = useCallback((details: { value: string | null }) => {
+    setPlace(details.value);
+    setHasHomeEquipment(null);
+  }, []);
+
+  const handleHasHomeEquipmentChange = useCallback((details: { value: string | null }) => {
+    setHasHomeEquipment(details.value);
+  }, []);
+
+  useEffect(() => {
+    if (gender) {
+      scrollToElement(genderSectionRef.current);
+    }
+  }, [gender, scrollToElement]);
+
+  useEffect(() => {
+    if (experience) {
+      scrollToElement(experienceSectionRef.current);
+    }
+  }, [experience, scrollToElement]);
+
+  useEffect(() => {
+    if (workoutCount) {
+      scrollToElement(workoutCountSectionRef.current);
+    }
+  }, [workoutCount, scrollToElement]);
+
+  useEffect(() => {
+    if (!muscleSelectionType) {
+      return;
+    }
+    if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
+      scrollToElement(muscleSelectionContentRef.current);
+      return;
+    }
+    if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES) {
+      let rafId = 0;
+      const tryScroll = () => {
+        const content = muscleSelectionContentRef.current;
+        if (content && content.offsetHeight > 0) {
+          scrollToElement(muscleSelectionSectionRef.current);
+          return;
+        }
+        rafId = requestAnimationFrame(tryScroll);
+      };
+      rafId = requestAnimationFrame(tryScroll);
+      return () => {
+        if (rafId) cancelAnimationFrame(rafId);
+      };
+    }
+  }, [muscleSelectionType, scrollToElement]);
+
+  useEffect(() => {
+    if (place) {
+      scrollToElement(placeSectionRef.current);
+    }
+  }, [place, scrollToElement]);
+
+  useEffect(() => {
+    if (!isNullish(hasHomeEquipment)) {
+      scrollToElement(homeEquipmentSectionRef.current);
+    }
+  }, [hasHomeEquipment, scrollToElement]);
 
   const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,7 +179,7 @@ export const Guided = () => {
       <PageContentWrapper>
         <form onSubmit={handleSubmit}>
           <Stack gap={4}>
-            <Card.Root size='sm'>
+            <Card.Root size='sm' ref={genderSectionRef}>
               <Card.Header>
                 <Heading size="md">
                   {RU.CREATE.SECTIONS.GENDER}
@@ -89,7 +188,7 @@ export const Guided = () => {
 
               <CardBody>
                 <RadioGroup.Root
-                  onValueChange={(e) => setGender(e.value)}
+                  onValueChange={handleGenderChange}
                 >
                   <HStack align="stretch">
                     {RU.CREATE.OPTIONS.GENDERS.map((item) => (
@@ -111,7 +210,7 @@ export const Guided = () => {
 
             {
               gender && (
-                <Card.Root size='sm'>
+                <Card.Root size='sm' ref={experienceSectionRef}>
                   <Card.Header>
                     <Heading size="md">
                       {RU.CREATE.SECTIONS.EXPERIENCE}
@@ -120,7 +219,7 @@ export const Guided = () => {
 
                   <Card.Body>
                     <RadioGroup.Root
-                      onValueChange={(e) => setExperience(e.value)}
+                      onValueChange={handleExperienceChange}
                     >
                       <Stack gap={3}>
                         <RadioGroup.Item value={RU.CREATE.EXPERIENCE_LEVELS.NOVICE.TITLE}>
@@ -168,7 +267,7 @@ export const Guided = () => {
 
             {
               gender && experience && (
-                <Card.Root size='sm'>
+                <Card.Root size='sm' ref={workoutCountSectionRef}>
                   <Card.Header>
                     <Heading size="md">
                       {RU.CREATE.SECTIONS.WORKOUT_COUNT}
@@ -177,7 +276,7 @@ export const Guided = () => {
 
                   <Card.Body>
                     <RadioGroup.Root
-                      onValueChange={(e) => setWorkoutCount(e.value)}
+                      onValueChange={handleWorkoutCountChange}
                     >
                       <Wrap>
                         {RU.CREATE.OPTIONS.TRAINING_DAYS.map((item) => (
@@ -201,7 +300,7 @@ export const Guided = () => {
 
             {
               workoutCount && (
-                <Card.Root size='sm'>
+                <Card.Root size='sm' ref={muscleSelectionSectionRef}>
                   <Card.Header>
                     <Heading size="md">
                       {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
@@ -211,7 +310,7 @@ export const Guided = () => {
                   <Card.Body>
                     <Stack gap={4}>
                       <RadioGroup.Root
-                        onValueChange={(e) => setMuscleSelectionType(e.value)}
+                        onValueChange={handleMuscleSelectionTypeChange}
                       >
                         <Wrap>
                           {
@@ -237,16 +336,13 @@ export const Guided = () => {
                         muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES && (
                           <Suspense
                             fallback={
-                              <Box
-                                p={4}
-                                textAlign="center"
-                              >
-                                <Text color="gray.500">
-                                  {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
-                                </Text>
-                              </Box>
+                              <Center>
+                                <Spinner />
+                              </Center>
                             }>
-                            <MuscleSelection />
+                            <Box ref={muscleSelectionContentRef}>
+                              <MuscleSelection />
+                            </Box>
                           </Suspense>
                         )
                       }
@@ -258,7 +354,7 @@ export const Guided = () => {
 
             {
               workoutCount && muscleSelectionType && (
-                <Card.Root size='sm'>
+                <Card.Root size='sm' ref={placeSectionRef}>
                   <Card.Header>
                     <Heading size="md">
                       {RU.CREATE.SECTIONS.PLACE}
@@ -267,10 +363,7 @@ export const Guided = () => {
 
                   <Card.Body>
                     <RadioGroup.Root
-                      onValueChange={(e) => {
-                        setPlace(e.value);
-                        setHasHomeEquipment(null);
-                      }}
+                      onValueChange={handlePlaceChange}
                     >
                       <Wrap>
                         {RU.CREATE.OPTIONS.PLACES.map((item) => (
@@ -305,7 +398,7 @@ export const Guided = () => {
 
             {
               workoutCount && place === RU.CREATE.OPTIONS.PLACES[0] && (
-                <Card.Root size='sm'>
+                <Card.Root size='sm' ref={homeEquipmentSectionRef}>
                   <Card.Header>
                     <Heading size="md">
                       {RU.CREATE.SECTIONS.HOME_EQUIPMENT}
@@ -314,7 +407,7 @@ export const Guided = () => {
 
                   <Card.Body>
                     <RadioGroup.Root
-                      onValueChange={(e) => setHasHomeEquipment(e.value)}
+                      onValueChange={handleHasHomeEquipmentChange}
                       mb={4}
                     >
                       <Wrap>
