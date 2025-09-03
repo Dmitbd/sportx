@@ -1,4 +1,4 @@
-import { Accordion, Box, Button, Card, CardBody, Center, Heading, HStack, RadioGroup, Spinner, Stack, Text, Wrap } from "@chakra-ui/react";
+import { Accordion, Box, Button, Card, Center, Heading, HStack, RadioGroup, Spinner, Stack, Text, Wrap } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { EquipmentCard } from "../components";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import { workoutCreate } from "@/services";
 import { askAI } from "@/services";
 import { RU, ERRORS } from "@/locales";
 import { isNullish } from "remeda";
+import type { ValueChangeDetails } from "node_modules/@chakra-ui/react/dist/types/components/radio-group/namespace";
 
 const MuscleSelection = lazy(() => import("../components/MuscleSelection")
   .then(module => ({ default: module.MuscleSelection })));
@@ -58,55 +59,71 @@ export const Guided = () => {
     window.scrollTo({ top: absoluteTop, behavior: 'smooth' });
   }, []);
 
-  const handleGenderChange = useCallback((details: { value: string | null }) => {
+  const focusElement = useCallback((element: HTMLElement | null) => {
+    if (!element) {
+      return;
+    }
+
+    element.focus({ preventScroll: true });
+  }, []);
+
+  const scrollAndFocus = useCallback((element: HTMLElement | null) => {
+    if (!element) {
+      return;
+    }
+    scrollToElement(element);
+    requestAnimationFrame(() => focusElement(element));
+  }, [scrollToElement, focusElement]);
+
+  const handleGenderChange = useCallback((details: ValueChangeDetails) => {
     setGender(details.value);
   }, []);
 
-  const handleExperienceChange = useCallback((details: { value: string | null }) => {
+  const handleExperienceChange = useCallback((details: ValueChangeDetails) => {
     setExperience(details.value);
   }, []);
 
-  const handleWorkoutCountChange = useCallback((details: { value: string | null }) => {
+  const handleWorkoutCountChange = useCallback((details: ValueChangeDetails) => {
     setWorkoutCount(details.value);
   }, []);
 
-  const handleMuscleSelectionTypeChange = useCallback((details: { value: string | null }) => {
+  const handleMuscleSelectionTypeChange = useCallback((details: ValueChangeDetails) => {
     setMuscleSelectionType(details.value);
   }, []);
 
-  const handlePlaceChange = useCallback((details: { value: string | null }) => {
+  const handlePlaceChange = useCallback((details: ValueChangeDetails) => {
     setPlace(details.value);
     setHasHomeEquipment(null);
   }, []);
 
-  const handleHasHomeEquipmentChange = useCallback((details: { value: string | null }) => {
+  const handleHasHomeEquipmentChange = useCallback((details: ValueChangeDetails) => {
     setHasHomeEquipment(details.value);
   }, []);
 
   useEffect(() => {
     if (gender) {
-      scrollToElement(genderSectionRef.current);
+      scrollAndFocus(genderSectionRef.current);
     }
-  }, [gender, scrollToElement]);
+  }, [gender, scrollAndFocus]);
 
   useEffect(() => {
     if (experience) {
-      scrollToElement(experienceSectionRef.current);
+      scrollAndFocus(experienceSectionRef.current);
     }
-  }, [experience, scrollToElement]);
+  }, [experience, scrollAndFocus]);
 
   useEffect(() => {
     if (workoutCount) {
-      scrollToElement(workoutCountSectionRef.current);
+      scrollAndFocus(workoutCountSectionRef.current);
     }
-  }, [workoutCount, scrollToElement]);
+  }, [workoutCount, scrollAndFocus]);
 
   useEffect(() => {
     if (!muscleSelectionType) {
       return;
     }
     if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.FULL_BODY) {
-      scrollToElement(muscleSelectionContentRef.current);
+      scrollAndFocus(muscleSelectionSectionRef.current);
       return;
     }
     if (muscleSelectionType === RU.CREATE.OPTIONS.SELECTION.SELECT_MUSCLES) {
@@ -114,7 +131,7 @@ export const Guided = () => {
       const tryScroll = () => {
         const content = muscleSelectionContentRef.current;
         if (content && content.offsetHeight > 0) {
-          scrollToElement(muscleSelectionSectionRef.current);
+          scrollAndFocus(muscleSelectionSectionRef.current);
           return;
         }
         rafId = requestAnimationFrame(tryScroll);
@@ -124,19 +141,19 @@ export const Guided = () => {
         if (rafId) cancelAnimationFrame(rafId);
       };
     }
-  }, [muscleSelectionType, scrollToElement]);
+  }, [muscleSelectionType, scrollAndFocus]);
 
   useEffect(() => {
     if (place) {
-      scrollToElement(placeSectionRef.current);
+      scrollAndFocus(placeSectionRef.current);
     }
-  }, [place, scrollToElement]);
+  }, [place, scrollAndFocus]);
 
   useEffect(() => {
     if (!isNullish(hasHomeEquipment)) {
-      scrollToElement(homeEquipmentSectionRef.current);
+      scrollAndFocus(homeEquipmentSectionRef.current);
     }
-  }, [hasHomeEquipment, scrollToElement]);
+  }, [hasHomeEquipment, scrollAndFocus]);
 
   const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -179,14 +196,18 @@ export const Guided = () => {
       <PageContentWrapper>
         <form onSubmit={handleSubmit}>
           <Stack gap={4}>
-            <Card.Root size='sm' ref={genderSectionRef}>
+            <Card.Root
+              ref={genderSectionRef}
+              size='sm'
+              aria-labelledby="guided-gender-heading"
+            >
               <Card.Header>
-                <Heading size="md">
+                <Heading id="guided-gender-heading" size="md">
                   {RU.CREATE.SECTIONS.GENDER}
                 </Heading>
               </Card.Header>
 
-              <CardBody>
+              <Card.Body>
                 <RadioGroup.Root
                   onValueChange={handleGenderChange}
                 >
@@ -205,14 +226,18 @@ export const Guided = () => {
                     ))}
                   </HStack>
                 </RadioGroup.Root>
-              </CardBody>
+              </Card.Body>
             </Card.Root>
 
             {
               gender && (
-                <Card.Root size='sm' ref={experienceSectionRef}>
+                <Card.Root
+                  ref={experienceSectionRef}
+                  size='sm'
+                  aria-labelledby="guided-experience-heading"
+                >
                   <Card.Header>
-                    <Heading size="md">
+                    <Heading id="guided-experience-heading" size="md">
                       {RU.CREATE.SECTIONS.EXPERIENCE}
                     </Heading>
                   </Card.Header>
@@ -267,9 +292,13 @@ export const Guided = () => {
 
             {
               gender && experience && (
-                <Card.Root size='sm' ref={workoutCountSectionRef}>
+                <Card.Root
+                  ref={workoutCountSectionRef}
+                  size='sm'
+                  aria-labelledby="guided-workout-count-heading"
+                >
                   <Card.Header>
-                    <Heading size="md">
+                    <Heading id="guided-workout-count-heading" size="md">
                       {RU.CREATE.SECTIONS.WORKOUT_COUNT}
                     </Heading>
                   </Card.Header>
@@ -300,9 +329,13 @@ export const Guided = () => {
 
             {
               workoutCount && (
-                <Card.Root size='sm' ref={muscleSelectionSectionRef}>
+                <Card.Root
+                  ref={muscleSelectionSectionRef}
+                  size='sm'
+                  aria-labelledby="guided-muscle-selection-heading"
+                >
                   <Card.Header>
-                    <Heading size="md">
+                    <Heading id="guided-muscle-selection-heading" size="md">
                       {RU.CREATE.SECTIONS.MUSCLE_SELECTION}
                     </Heading>
                   </Card.Header>
@@ -354,9 +387,13 @@ export const Guided = () => {
 
             {
               workoutCount && muscleSelectionType && (
-                <Card.Root size='sm' ref={placeSectionRef}>
+                <Card.Root
+                  ref={placeSectionRef}
+                  size='sm'
+                  aria-labelledby="guided-place-heading"
+                >
                   <Card.Header>
-                    <Heading size="md">
+                    <Heading id="guided-place-heading" size="md">
                       {RU.CREATE.SECTIONS.PLACE}
                     </Heading>
                   </Card.Header>
@@ -398,9 +435,13 @@ export const Guided = () => {
 
             {
               workoutCount && place === RU.CREATE.OPTIONS.PLACES[0] && (
-                <Card.Root size='sm' ref={homeEquipmentSectionRef}>
+                <Card.Root
+                  ref={homeEquipmentSectionRef}
+                  size='sm'
+                  aria-labelledby="guided-home-equipment-heading"
+                >
                   <Card.Header>
-                    <Heading size="md">
+                    <Heading id="guided-home-equipment-heading" size="md">
                       {RU.CREATE.SECTIONS.HOME_EQUIPMENT}
                     </Heading>
                   </Card.Header>
